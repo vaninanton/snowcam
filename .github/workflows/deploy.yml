@@ -9,7 +9,6 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# Sets the GITHUB_TOKEN permissions to allow deployment to GitHub Pages
 permissions:
   contents: read
   pages: write
@@ -19,43 +18,50 @@ permissions:
 concurrency:
   group: 'pages'
   cancel-in-progress: true
-
 jobs:
   build:
+    name: Build
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repo
+        uses: actions/checkout@v3
 
-      - uses: bahmutov/npm-install@v1
+      - name: Setup Node
+        uses: actions/setup-node@v3
 
-      - name: Build
+      - name: Install dependencies
+        uses: bahmutov/npm-install@v1
+
+      - name: Build project
         run: npm run build
 
       - name: Upload production-ready build files
         uses: actions/upload-artifact@v3
         with:
-          name: github-pages
+          name: production-files
           path: ./dist
 
   deploy:
+    name: Deploy
+
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    
+      url: https://vaninanton.github.io/snowcam/
+
     needs: build
-    
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
 
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v3
         with:
-          name: github-pages
+          name: production-files
           path: ./dist
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v3
-
       - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v2
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
