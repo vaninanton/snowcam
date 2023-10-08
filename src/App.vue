@@ -1,0 +1,83 @@
+<script setup>
+import VideoPlayer from "./components/VideoPlayer.vue";
+import Weather from "./components/Weather.vue";
+</script>
+
+<template>
+  <Weather />
+
+  <ul
+    class="grid max-w-[26rem] sm:max-w-[52.5rem] mt-16 sm:mt-20 md:mt-32 grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 mx-auto gap-6 lg:gap-y-8 xl:gap-x-8 lg:max-w-7xl px-4 sm:px-6 lg:px-8"
+  >
+    <li
+      class="group relative rounded-3xl bg-slate-50 p-6 dark:bg-slate-800/80 dark:highlight-white/5 hover:bg-slate-100 dark:hover:bg-slate-700/50"
+      v-for="video in videos"
+    >
+      <div
+        class="aspect-video relative rounded-md transform overflow-hidden shadow-[0_2px_8px_rgba(15,23,42,0.08)] bg-slate-200 dark:bg-slate-700"
+      >
+        <img
+          alt=""
+          fetchpriority="high"
+          width="672"
+          height="494"
+          decoding="async"
+          class="absolute inset-0 w-full h-full"
+          style="color: transparent"
+          :src="video.poster"
+        />
+        <VideoPlayer :src="video.src" :poster="video.poster" />
+      </div>
+      <div class="flex flex-wrap items-center mt-6">
+        <h2
+          class="text-sm leading-6 text-slate-900 dark:text-white font-semibold group-hover:text-sky-500 dark:group-hover:text-sky-400"
+        >
+          {{ video.title }}
+        </h2>
+        <p
+          class="w-full flex-none text-[0.8125rem] leading-6 text-slate-500 dark:text-slate-400"
+        >
+          {{ video.description }}
+        </p>
+      </div>
+    </li>
+  </ul>
+</template>
+<script>
+export default {
+  data() {
+    return {
+      videos: [
+        {
+          title: "Ледник Богдановича",
+          description: "Верхняя станция, камера в сторону сноупарка",
+          src: "https://ipcam.kz/cam6/index.m3u8",
+          poster:
+            "previews/3212b47c65ccc0cb9759f5c08632c563.jpg",
+        },
+        {
+          title: "Средняя станция",
+          description: "Средняя станция, где пили кофе и ели хотдоги",
+          src: "https://ipcam.kz/cam5/index.m3u8",
+          poster:
+            "previews/ffa10e45b1d87ab0aa8796bc7969046b.jpg",
+        },
+        {
+          title: "Базовая станция, бугель",
+          description: "Бугель на базовой станции",
+          src: "https://ipcam.kz/cam2/index.m3u8",
+          poster:
+            "previews/d5361ff25a96271df9ac614d9138806a.jpg",
+        },
+        {
+          title: "Базовая станция",
+          description: "Базовая станция",
+          src: "https://ipcam.kz/cam1/index.m3u8",
+          poster:
+            "previews/197f1dde9a2c929cca5496f225cc2d62.jpg",
+        },
+      ],
+    };
+  },
+};
+</script>
