@@ -52,7 +52,6 @@ export default {
       } else if (this.video.mozRequestFullscreen) {
         this.video.mozRequestFullScreen();
       }
-
     },
   },
   mounted() {

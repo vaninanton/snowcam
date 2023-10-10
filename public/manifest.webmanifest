@@ -1,13 +1,13 @@
 {
-    "name": "snowcam",
-    "short_name": "snowcam",
-    "display": "standalone",
-    "background_color": "#0f172a",
-    "description": "A snowcam app.",
-    "icons": [
-        {
-            "src": "favicon.svg",
-            "type": "image/svg"
-        }
-    ]
+  "name": "snowcam",
+  "short_name": "snowcam",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "description": "A snowcam app.",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "type": "image/svg"
+    }
+  ]
 }
