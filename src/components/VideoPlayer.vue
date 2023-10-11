@@ -2,7 +2,6 @@
   <!-- <div style="opacity: 0; transition: opacity 0.5s linear 0s;"></div> -->
   <video
     class="absolute inset-0 w-full h-full [mask-image:radial-gradient(white,black)]"
-    :poster="poster"
     ref="video"
     v-on:click="fullscreen"
     muted

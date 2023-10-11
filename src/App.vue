@@ -44,6 +44,10 @@ import Weather from "./components/Weather.vue";
   </ul>
 </template>
 <script>
+import poster1 from "/previews/3212b47c65ccc0cb9759f5c08632c563.jpg";
+import poster2 from "/previews/ffa10e45b1d87ab0aa8796bc7969046b.jpg";
+import poster3 from "/previews/d5361ff25a96271df9ac614d9138806a.jpg";
+import poster4 from "/previews/197f1dde9a2c929cca5496f225cc2d62.jpg";
 export default {
   data() {
     return {
@@ -52,25 +56,25 @@ export default {
           title: "Ледник Богдановича",
           description: "Верхняя станция, камера в сторону сноупарка",
           src: "https://ipcam.kz/cam6/index.m3u8",
-          poster: "previews/3212b47c65ccc0cb9759f5c08632c563.jpg",
+          poster: poster1,
         },
         {
           title: "Средняя станция",
           description: "Средняя станция, где пили кофе и ели хотдоги",
           src: "https://ipcam.kz/cam5/index.m3u8",
-          poster: "previews/ffa10e45b1d87ab0aa8796bc7969046b.jpg",
+          poster: poster2,
         },
         {
           title: "Базовая станция, бугель",
           description: "Бугель на базовой станции",
           src: "https://ipcam.kz/cam2/index.m3u8",
-          poster: "previews/d5361ff25a96271df9ac614d9138806a.jpg",
+          poster: poster3,
         },
         {
           title: "Базовая станция",
           description: "Базовая станция",
           src: "https://ipcam.kz/cam1/index.m3u8",
-          poster: "previews/197f1dde9a2c929cca5496f225cc2d62.jpg",
+          poster: poster4,
         },
       ],
     };
