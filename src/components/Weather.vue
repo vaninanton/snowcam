@@ -86,7 +86,7 @@ export default {
           time: dayjs(data.time[i]),
           temperature: data.temperature[i],
           img:
-            "snowcam/pictocode/" +
+            "pictocode/" +
             data.pictocode[i] +
             "_" +
             (data.isdaylight[i] ? "day" : "night") +
