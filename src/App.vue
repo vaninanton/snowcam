@@ -62,6 +62,30 @@ export default {
           src: "https://ipcam.kz/cam1/index.m3u8",
           poster: poster4,
         },
+        {
+          title: "Лесная сказка",
+          description: "Old Skazka",
+          src: "https://s46.ipcamlive.com/streams/2egmov7mp1rwfdwn4/stream.m3u8",
+          poster: poster4,
+        },
+        {
+          title: "Лесная сказка",
+          description: "Склон Irbis",
+          src: "https://s10.ipcamlive.com/streams/0aw85cpkzrhfwpjxg/stream.m3u8",
+          poster: poster4,
+        },
+        {
+          title: "Лесная сказка",
+          description: "Lift A",
+          src: "https://s75.ipcamlive.com/streams/4bucjko3eixri8xps/stream.m3u8",
+          poster: poster4,
+        },
+        {
+          title: "Лесная сказка",
+          description: "Lift C",
+          src: "https://s10.ipcamlive.com/streams/0anazyiyo1m8uotb2/stream.m3u8",
+          poster: poster4,
+        },
       ],
     };
   },

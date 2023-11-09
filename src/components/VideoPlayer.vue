@@ -45,33 +45,27 @@ export default {
   },
   methods: {
     playVideo() {
-      let video = this.$refs["video"];
+      let video = this.$refs.video;
 
       if (Hls.isSupported()) {
         const hls = new Hls();
-        hls.on(Hls.Events.MEDIA_ATTACHED, this.mediaAttached);
-        hls.on(Hls.Events.MANIFEST_PARSED, this.manifestParsed);
+        hls.on(Hls.Events.MANIFEST_PARSED, this._manifestParsed);
         hls.loadSource(this.src);
         hls.attachMedia(video);
-      } else {
+      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
         video.src = this.src;
-        video.play();
-        setTimeout(() => {
-          this.loaded = true;
-        }, 500);
+        video.addEventListener('loadedmetadata', this._manifestParsed);
       }
     },
-    mediaAttached(event, data) {
+    _manifestParsed() {
+      let video = this.$refs.video;
+      video.play();
       setTimeout(() => {
         this.loaded = true;
       }, 500);
     },
-    manifestParsed(event, data) {
-      let video = this.$refs["video"];
-      video.play();
-    },
     fullscreen() {
-      let video = this.$refs["video"];
+      let video = this.$refs.video;
       video.play();
       if (video.requestFullscreen) {
         video.requestFullscreen();
