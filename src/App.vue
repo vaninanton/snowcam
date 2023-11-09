@@ -1,9 +1,11 @@
 <script setup>
 import VideoPlayer from "./components/VideoPlayer.vue";
 import Weather from "./components/Weather.vue";
+import Version from "./components/Version.vue";
 </script>
 
 <template>
+  <Version />
   <Weather />
 
   <ul
