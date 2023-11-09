@@ -8,7 +8,7 @@
       width="672"
       height="494"
       decoding="async"
-      class="absolute inset-0 w-full h-full"
+      class="absolute inset-0 w-full h-full pointer-events-none"
       style="color: transparent"
       :src="poster"
     />
@@ -18,12 +18,13 @@
         'opacity-100': loaded,
         'transition-opacity': true,
       }"
-      v-on:click="fullscreen"
     >
       <video
         class="absolute inset-0 w-full h-full [mask-image:radial-gradient(white,black)]"
         ref="video"
         muted
+        controls
+        allowfulscreen
         playsinline
       ></video>
     </div>
@@ -62,20 +63,7 @@ export default {
       video.play();
       setTimeout(() => {
         this.loaded = true;
-      }, 500);
-    },
-    fullscreen() {
-      let video = this.$refs.video;
-      video.play();
-      if (video.requestFullscreen) {
-        video.requestFullscreen();
-      } else if (video.webkitrequestFullscreen) {
-        video.webkitRequestFullscreen();
-      } else if (video.webkitEnterFullScreen) {
-        video.webkitEnterFullScreen();
-      } else if (video.mozRequestFullscreen) {
-        video.mozRequestFullScreen();
-      }
+      }, 1000);
     },
   },
   mounted() {
