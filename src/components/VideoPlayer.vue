@@ -8,16 +8,15 @@
       width="672"
       height="494"
       decoding="async"
-      class="absolute inset-0 w-full h-full pointer-events-none"
+      :class="{
+        'opacity-0': loaded,
+        'opacity-100': !loaded,
+        'absolute inset-0 w-full h-full pointer-events-none transition-opacity z-10': true,
+      }"
       style="color: transparent"
       :src="poster"
     />
     <div
-      :class="{
-        'opacity-0': !loaded,
-        'opacity-100': loaded,
-        'transition-opacity': true,
-      }"
     >
       <video
         class="absolute inset-0 w-full h-full [mask-image:radial-gradient(white,black)]"
