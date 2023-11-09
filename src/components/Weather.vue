@@ -28,7 +28,7 @@
         </div>
         <img :src="nowWeather.img" v-if="nowWeather" alt="" class="h-20" @click="reload" />
       </div>
-      <div class="flex justify-between mt-12">
+      <div class="flex justify-between mt-6 lg:mt-12">
         <div class="flex flex-col items-center" v-for="hour in forecast">
           <span class="font-semibold text-sm">{{
             hour.time.format("HH:mm")
