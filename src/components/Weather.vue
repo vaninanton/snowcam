@@ -1,12 +1,13 @@
 <template>
   <div
-    class="flex flex-col items-center justify-center w-screen text-gray-700 px-10 pt-5 bg-gradient-to-br"
+    class="items-center justify-center w-screen text-gray-700 px-6 pt-5 bg-gradient-to-br"
   >
     <div
-      class="w-full max-w-screen-sm bg-white p-6 rounded-xl ring-8 ring-white ring-opacity-40"
+      class="bg-white p-4 rounded-xl ring-8 ring-white ring-opacity-40"
     >
       <div class="flex justify-between">
         <div class="flex flex-col">
+          <span class="font-semibold mt-1 text-gray-500">Сейчас</span>
           <span class="text-6xl font-bold">
             <span v-if="nowWeather"
               >{{ Math.floor(nowWeather.temperature) }}°C</span
@@ -24,28 +25,27 @@
               >
             </div>
           </div>
-          <span class="font-semibold mt-1 text-gray-500">Сейчас</span>
         </div>
-        <img :src="nowWeather.img" v-if="nowWeather" alt="" class="h-24" />
+        <img :src="nowWeather.img" v-if="nowWeather" alt="" class="h-20" @click="reload" />
       </div>
       <div class="flex justify-between mt-12">
         <div class="flex flex-col items-center" v-for="hour in forecast">
-          <span class="font-semibold text-lg">{{
+          <span class="font-semibold text-sm">{{
             hour.time.format("HH:mm")
           }}</span>
           <img
             :src="hour.img"
             alt=""
-            class="h-10 fill-current text-gray-400 mt-3"
+            class="h-8 fill-current text-gray-400 mt-3"
           />
           <div class="font-semibold mt-1 text-sm">
             {{ Math.floor(hour.temperature) }}°C
           </div>
           <div class="text-xs font-light text-gray-400">
-            Ветер: {{ hour.windspeed }} m/s
+            {{ hour.windspeed }} m/s
           </div>
           <div class="text-xs font-light text-gray-400">
-            Осадки: {{ hour.precipitation_probability }} %
+            {{ hour.precipitation_probability }} %
           </div>
         </div>
       </div>
@@ -63,6 +63,9 @@ export default {
     };
   },
   methods: {
+    reload() {
+      window.location.reload();
+    },
     async getMeteoBlue() {
       this.weatherData = await fetch(
         "https://api-v2.shymbulak-dev.com/content-service/weather/meteoblue",
