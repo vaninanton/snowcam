@@ -15,7 +15,8 @@
     />
     <div>
       <video
-        class="absolute inset-0 w-full h-full [mask-image:radial-gradient(white,black)]"
+        class="absolute inset-0 w-full h-full"
+        :src="video.src"
         ref="video"
         muted
         controls

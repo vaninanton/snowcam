@@ -1,9 +1,7 @@
 <script setup>
 import { defineAsyncComponent } from "vue";
 
-const VideoItem = defineAsyncComponent(() =>
-  import("./VideoItem.vue"),
-);
+const VideoItem = defineAsyncComponent(() => import("./VideoItem.vue"));
 
 const videos = [
   {
@@ -34,7 +32,7 @@ const videos = [
 ];
 </script>
 <template>
-    <ul
+  <ul
     class="grid max-w-[26rem] sm:max-w-[52.5rem] mt-10 sm:mt-20 md:mt-32 mb-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 mx-auto gap-6 lg:gap-y-8 xl:gap-x-8 lg:max-w-full px-4 sm:px-6 lg:px-8"
   >
     <li

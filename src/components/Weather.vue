@@ -34,7 +34,9 @@
             class="h-20"
             @click="reload"
           />
-          <span v-if="weatherData" class="text-xs">{{ weatherData.loadedAt.format("DD.MM.YYYY HH:mm") }}</span>
+          <span v-if="weatherData" class="text-xs">UPD: {{
+            weatherData.loadedAt.format("DD.MM HH:mm")
+          }}</span>
         </div>
       </div>
 
