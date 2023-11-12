@@ -25,7 +25,7 @@ jobs:
   deploy:
     environment:
       name: github-pages
-      url: https://vaninanton.github.io/snowcam/
+      url: https://snowcam.vaninanton.ru
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

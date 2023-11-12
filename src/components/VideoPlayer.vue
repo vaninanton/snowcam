@@ -16,8 +16,7 @@
       style="color: transparent"
       :src="poster"
     />
-    <div
-    >
+    <div>
       <video
         class="absolute inset-0 w-full h-full [mask-image:radial-gradient(white,black)]"
         ref="video"
@@ -52,9 +51,9 @@ export default {
         hls.on(Hls.Events.MANIFEST_PARSED, this._manifestParsed);
         hls.loadSource(this.src);
         hls.attachMedia(video);
-      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
         video.src = this.src;
-        video.addEventListener('loadedmetadata', this._manifestParsed);
+        video.addEventListener("loadedmetadata", this._manifestParsed);
       }
     },
     _manifestParsed() {

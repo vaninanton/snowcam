@@ -41,25 +41,26 @@ export default {
     return {
       videos: [
         {
-          title: "Ледник Богдановича",
-          description: "Верхняя станция, камера в сторону сноупарка",
+          title: "Шымбулак",
+          description:
+            "Верхняя станция, камера в сторону сноупарка и Ледника Богдановича",
           src: "https://ipcam.kz/cam6/index.m3u8",
           poster: poster1,
         },
         {
-          title: "Средняя станция",
-          description: "Средняя станция, где пили кофе и ели хотдоги",
+          title: "Шымбулак",
+          description: "Средняя станция, где ларек с хот-догами",
           src: "https://ipcam.kz/cam5/index.m3u8",
           poster: poster2,
         },
         {
-          title: "Базовая станция, бугель",
+          title: "Шымбулак",
           description: "Бугель на базовой станции",
           src: "https://ipcam.kz/cam2/index.m3u8",
           poster: poster3,
         },
         {
-          title: "Базовая станция",
+          title: "Шымбулак",
           description: "Базовая станция",
           src: "https://ipcam.kz/cam1/index.m3u8",
           poster: poster4,
@@ -68,25 +69,25 @@ export default {
           title: "Лесная сказка",
           description: "Old Skazka",
           src: "https://s46.ipcamlive.com/streams/2egmov7mp1rwfdwn4/stream.m3u8",
-          poster: poster4,
+          // poster: poster4,
         },
         {
           title: "Лесная сказка",
           description: "Склон Irbis",
           src: "https://s10.ipcamlive.com/streams/0aw85cpkzrhfwpjxg/stream.m3u8",
-          poster: poster4,
+          // poster: poster4,
         },
-        {
-          title: "Лесная сказка",
-          description: "Lift A",
-          src: "https://s75.ipcamlive.com/streams/4bucjko3eixri8xps/stream.m3u8",
-          poster: poster4,
-        },
+        // {
+        //   title: "Лесная сказка",
+        //   description: "Lift A",
+        //   src: "https://s75.ipcamlive.com/streams/4bucjko3eixri8xps/stream.m3u8",
+        //   // poster: poster4,
+        // },
         {
           title: "Лесная сказка",
           description: "Lift C",
           src: "https://s10.ipcamlive.com/streams/0anazyiyo1m8uotb2/stream.m3u8",
-          poster: poster4,
+          // poster: poster4,
         },
       ],
     };
