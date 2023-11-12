@@ -1,7 +1,11 @@
 <script setup>
-import VideoPlayer from "./components/VideoPlayer.vue";
-import Weather from "./components/Weather.vue";
-import Version from "./components/Version.vue";
+import { defineAsyncComponent } from "vue";
+
+const VideoPlayer = defineAsyncComponent(() =>
+  import("./components/VideoPlayer.vue"),
+);
+const Weather = defineAsyncComponent(() => import("./components/Weather.vue"));
+const Version = defineAsyncComponent(() => import("./components/Version.vue"));
 </script>
 
 <template>
