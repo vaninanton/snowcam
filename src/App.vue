@@ -7,7 +7,7 @@ const Version = defineAsyncComponent(() => import("./components/Version.vue"));
 </script>
 
 <template>
-  <Version />
   <Weather />
   <Videos />
+  <Version />
 </template>
