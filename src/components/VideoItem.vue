@@ -5,16 +5,13 @@
     <img
       alt=""
       fetchpriority="high"
-      width="672"
-      height="494"
       decoding="async"
       :class="{
         'opacity-0': loaded,
         'opacity-100': !loaded,
         'absolute inset-0 w-full h-full pointer-events-none transition-opacity z-10': true,
       }"
-      style="color: transparent"
-      :src="poster"
+      :src="video.poster"
     />
     <div>
       <video
@@ -27,6 +24,18 @@
       ></video>
     </div>
   </div>
+  <div class="flex flex-wrap items-center mt-6">
+    <h2
+      class="text-sm leading-6 text-slate-900 dark:text-white font-semibold group-hover:text-sky-500 dark:group-hover:text-sky-400"
+    >
+      {{ video.title }}
+    </h2>
+    <p
+      class="w-full flex-none text-[0.8125rem] leading-6 text-slate-500 dark:text-slate-400"
+    >
+      {{ video.description }}
+    </p>
+  </div>
 </template>
 
 <script>
@@ -34,8 +43,7 @@ import Hls from "hls.js";
 
 export default {
   props: {
-    src: String,
-    poster: String,
+    video: Object,
   },
   data() {
     return {
@@ -49,10 +57,10 @@ export default {
       if (Hls.isSupported()) {
         const hls = new Hls();
         hls.on(Hls.Events.MANIFEST_PARSED, this._manifestParsed);
-        hls.loadSource(this.src);
+        hls.loadSource(this.video.src);
         hls.attachMedia(video);
       } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-        video.src = this.src;
+        video.src = this.video.src;
         video.addEventListener("loadedmetadata", this._manifestParsed);
       }
     },

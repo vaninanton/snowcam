@@ -1,0 +1,47 @@
+<script setup>
+import { defineAsyncComponent } from "vue";
+
+const VideoItem = defineAsyncComponent(() =>
+  import("./VideoItem.vue"),
+);
+
+const videos = [
+  {
+    title: "Шымбулак",
+    description:
+      "Верхняя станция, камера в сторону сноупарка и Ледника Богдановича",
+    src: "https://ipcam.kz/cam6/index.m3u8",
+    poster: "/previews/3212b47c65ccc0cb9759f5c08632c563.jpg",
+  },
+  // {
+  //   title: "Шымбулак",
+  //   description: "Средняя станция, где ларек с хот-догами",
+  //   src: "https://ipcam.kz/cam5/index.m3u8",
+  //   poster: "/previews/ffa10e45b1d87ab0aa8796bc7969046b.jpg",
+  // },
+  {
+    title: "Шымбулак",
+    description: "Бугель на базовой станции",
+    src: "https://ipcam.kz/cam2/index.m3u8",
+    poster: "/previews/d5361ff25a96271df9ac614d9138806a.jpg",
+  },
+  {
+    title: "Шымбулак",
+    description: "Базовая станция",
+    src: "https://ipcam.kz/cam1/index.m3u8",
+    poster: "/previews/197f1dde9a2c929cca5496f225cc2d62.jpg",
+  },
+];
+</script>
+<template>
+    <ul
+    class="grid max-w-[26rem] sm:max-w-[52.5rem] mt-10 sm:mt-20 md:mt-32 mb-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 mx-auto gap-6 lg:gap-y-8 xl:gap-x-8 lg:max-w-full px-4 sm:px-6 lg:px-8"
+  >
+    <li
+      class="group relative rounded-3xl bg-slate-50 p-6 dark:bg-slate-800/80 dark:highlight-white/5 hover:bg-slate-100 dark:hover:bg-slate-700/50"
+      v-for="video in videos"
+    >
+      <VideoItem :video="video" />
+    </li>
+  </ul>
+</template>

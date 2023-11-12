@@ -26,13 +26,16 @@
             </div>
           </div>
         </div>
-        <img
-          :src="nowWeather.img"
-          v-if="nowWeather"
-          alt=""
-          class="h-20"
-          @click="reload"
-        />
+        <div>
+          <img
+            :src="nowWeather.img"
+            v-if="nowWeather"
+            alt=""
+            class="h-20"
+            @click="reload"
+          />
+          <span v-if="weatherData" class="text-xs">{{ weatherData.loadedAt.format("DD.MM.YYYY HH:mm") }}</span>
+        </div>
       </div>
 
       <div class="flex snap-x snap-mandatory overflow-x-auto mt-6 lg:mt-12">
@@ -89,6 +92,7 @@ export default {
       if (cachedData) {
         // Если данные есть в кеше, возвращаем их
         this.weatherData = JSON.parse(cachedData);
+        this.weatherData.loadedAt = dayjs(this.weatherData.loadedAt);
       } else {
         // Если данных нет в кеше, делаем запрос к API
         const response = await fetch(
@@ -98,6 +102,8 @@ export default {
         if (response.ok) {
           // Если запрос успешный, сохраняем данные в кеше и возвращаем их
           const data = await response.json();
+          data.loadedAt = dayjs();
+
           this.weatherData = data;
           localStorage.setItem("meteoBlueData", JSON.stringify(data));
         } else {
@@ -105,11 +111,6 @@ export default {
           console.error("Ошибка при запросе данных с сервера");
         }
       }
-      // this.weatherData = await fetch(
-      //   "https://api-v2.shymbulak-dev.com/content-service/weather/meteoblue",
-      // )
-      //   .then((response) => response.json())
-      //   .then((data) => data);
     },
   },
   computed: {
