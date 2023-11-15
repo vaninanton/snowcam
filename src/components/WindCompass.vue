@@ -1,8 +1,10 @@
 <template
-    class="inline-block origin-center select-none"
-    :title="title"
-    :style="arrowStyle"
-    >&uarr;</template>
+  class="inline-block origin-center select-none"
+  :title="title"
+  :style="arrowStyle"
+>
+  &uarr;
+</template>
 
 <script>
 export default {

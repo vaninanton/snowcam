@@ -9,9 +9,13 @@
     "preview": "vite preview --host=0.0.0.0"
   },
   "dependencies": {
+    "@bybas/weather-icons": "^2.0.0",
+    "axios": "^1.6.1",
     "dayjs": "^1.11.10",
     "hls.js": "^1.4.12",
     "ios-pwa-splash": "^1.0.0",
+    "moment": "^2.29.4",
+    "query-string": "^8.1.0",
     "vue": "^3.3.8"
   },
   "devDependencies": {
