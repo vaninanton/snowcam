@@ -6,7 +6,11 @@
   "scripts": {
     "dev": "vite --host=0.0.0.0",
     "build": "vite build",
-    "preview": "vite preview --host=0.0.0.0"
+    "eslint": "eslint --fix",
+    "prettier": "prettier --write",
+    "preview": "vite preview --host=0.0.0.0",
+    "prepare": "husky install",
+    "test": "echo \"Error: no test specified\" && exit 0"
   },
   "dependencies": {
     "@bybas/weather-icons": "^2.0.0",
@@ -21,10 +25,23 @@
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.4.1",
     "autoprefixer": "^10.4.16",
+    "eslint": "^8.53.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.29.0",
+    "eslint-plugin-vue": "^9.18.1",
+    "husky": "^8.0.0",
+    "lint-staged": "^15.1.0",
     "postcss": "^8.4.31",
+    "prettier": "^3.1.0",
     "tailwindcss": "^3.3.5",
     "vite": "^4.5.0",
     "vite-plugin-mkcert": "^1.16.0",
     "vite-plugin-pwa": "^0.16.7"
+  },
+  "lint-staged": {
+    "*.{js,vue}": [
+      "eslint --fix",
+      "prettier --write"
+    ]
   }
 }

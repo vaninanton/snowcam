@@ -1,6 +1,4 @@
-<script setup>
-import TimelineItem from "./Tomorrow/TimelineItem.vue";
-</script>
+<script setup></script>
 <template>
   <div>
     <h1 class="text-4xl font-semibold hidden sm:block">Погода</h1>
@@ -20,9 +18,10 @@ import TimelineItem from "./Tomorrow/TimelineItem.vue";
       >
         <div
           class="flex-1 transition-colors"
-          v-for="timeline in weatherData.hourly"
+          v-for="item in weatherData.hourly"
+          v-bind:key="item.startTime"
         >
-          <TimelineItem :timeline="timeline" />
+          <TimelineItem :timeline="item" />
         </div>
       </div>
     </div>
@@ -32,28 +31,30 @@ import TimelineItem from "./Tomorrow/TimelineItem.vue";
 <script>
 import queryString from "query-string";
 import moment from "moment/min/moment-with-locales";
+import TimelineItem from "./Tomorrow/TimelineItem.vue";
+
 moment.locale("ru");
 
 const getTimelineURL = "https://api.tomorrow.io/v4/timelines";
 const apikey = "doNdD2yT8uRWMF8Mkf5JJFNuasSurjfN";
-let location = [43.120649, 77.096193];
+const location = [43.120649, 77.096193];
 const fieldsList = {
-  temperature: 'The "real" temperature measurement (at 2m)	',
+  temperature: 'The "real" temperature measurement (at 2m)',
   temperatureApparent:
     "The temperature equivalent perceived by humans, caused by the combined effects of air temperature, relative humidity, and wind speed (at 2m)",
   dewPoint:
-    "The temperature to which air must be cooled to become saturated with water vapor (at 2m)	",
-  humidity: "The concentration of water vapor present in the air	",
+    "The temperature to which air must be cooled to become saturated with water vapor (at 2m)",
+  humidity: "The concentration of water vapor present in the air",
   windSpeed:
-    "The fundamental atmospheric quantity caused by air moving from high to low pressure, usually due to changes in temperature (at 10m)	",
+    "The fundamental atmospheric quantity caused by air moving from high to low pressure, usually due to changes in temperature (at 10m)",
   windDirection:
-    "The direction from which it originates, measured in degrees clockwise from due north (at 10m)	",
+    "The direction from which it originates, measured in degrees clockwise from due north (at 10m)",
   windGust:
-    "The maximum brief increase in the speed of the wind, usually less than 20 seconds (at 10m)	",
+    "The maximum brief increase in the speed of the wind, usually less than 20 seconds (at 10m)",
   pressureSurfaceLevel:
-    "The force exerted against a surface by the weight of the air above the surface (at the surface level)	",
+    "The force exerted against a surface by the weight of the air above the surface (at the surface level)",
   pressureSeaLevel:
-    "The force exerted against a surface by the weight of the air above the surface (at the mean sea level)	",
+    "The force exerted against a surface by the weight of the air above the surface (at the mean sea level)",
   precipitationIntensity:
     "The instantaneous precipitation rate at ground level",
   rainIntensity: "",
@@ -110,7 +111,7 @@ export default {
   data() {
     return {
       apiData: {},
-      moment: moment,
+      moment,
       weatherData: {
         current: null,
         daily: null,
@@ -136,14 +137,15 @@ export default {
         weatherData = JSON.parse(cachedData);
       } else {
         weatherData = await this.$http.get(
-          getTimelineURL + "?" + getTimelineParameters,
+          `${getTimelineURL}?${getTimelineParameters}`,
         );
         localStorage.setItem("tomorrowioData", JSON.stringify(weatherData));
       }
 
       weatherData.data.timelines.forEach((element) => {
         if (element.timestep === "current") {
-          this.weatherData.current = element.intervals[0];
+          const [firstInterval] = element.intervals;
+          this.weatherData.current = firstInterval;
         } else if (element.timestep === "1d") {
           this.weatherData.daily = element.intervals;
         } else if (element.timestep === "1h") {
@@ -159,6 +161,9 @@ export default {
       }
       return Math.floor(this.weatherData.current?.values.temperature);
     },
+  },
+  components: {
+    TimelineItem,
   },
 };
 </script>

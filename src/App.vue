@@ -1,14 +1,19 @@
 <script setup>
 import { defineAsyncComponent } from "vue";
-import Tomorrow from "./components/Tomorrow.vue";
 
-const Videos = defineAsyncComponent(() => import("./components/Videos.vue"));
-const Weather = defineAsyncComponent(() => import("./components/Weather.vue"));
-const Version = defineAsyncComponent(() => import("./components/Version.vue"));
+const TomorrowWidget = defineAsyncComponent(
+  () => import("./components/TomorrowWidget.vue"),
+);
+const VideosList = defineAsyncComponent(
+  () => import("./components/VideosList.vue"),
+);
+const VersionString = defineAsyncComponent(
+  () => import("./components/VersionString.vue"),
+);
 </script>
 
 <template>
-  <Tomorrow />
-  <Videos />
-  <Version />
+  <TomorrowWidget />
+  <VideosList />
+  <VersionString />
 </template>

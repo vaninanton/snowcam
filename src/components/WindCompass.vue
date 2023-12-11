@@ -17,7 +17,7 @@ export default {
   },
   computed: {
     title() {
-      let angle = this.windDirection;
+      const angle = this.windDirection;
       const directions = [
         "Северный",
         "Северо-восточный",

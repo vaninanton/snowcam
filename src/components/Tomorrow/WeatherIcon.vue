@@ -3,7 +3,8 @@
 </template>
 <script>
 import moment from "moment/min/moment-with-locales";
-import { getDayIcon, getNightIcon } from "./GetIcon.js";
+import { getDayIcon, getNightIcon } from "./GetIcon";
+
 export default {
   props: {
     timeline: Object,

@@ -1,6 +1,6 @@
 <template>
   <div
-    class="aspect-video relative rounded-md transform overflow-hidden shadow-[0_2px_8px_rgba(15,23,42,0.08)] bg-slate-200 dark:bg-slate-700"
+    class="aspect-video relative transform overflow-hidden shadow-[0_2px_8px_rgba(15,23,42,0.08)] bg-slate-200 dark:bg-slate-700"
   >
     <img
       alt=""
@@ -25,7 +25,7 @@
       ></video>
     </div>
   </div>
-  <div class="flex flex-wrap items-center mt-6">
+  <div class="flex flex-wrap items-center lg:p-6">
     <h2
       class="text-sm leading-6 text-slate-900 dark:text-white font-semibold group-hover:text-sky-500 dark:group-hover:text-sky-400"
     >
@@ -53,20 +53,20 @@ export default {
   },
   methods: {
     playVideo() {
-      let video = this.$refs.video;
+      const { video } = this.$refs;
 
       if (Hls.isSupported()) {
         const hls = new Hls();
-        hls.on(Hls.Events.MANIFEST_PARSED, this._manifestParsed);
+        hls.on(Hls.Events.MANIFEST_PARSED, this.manifestParsed);
         hls.loadSource(this.video.src);
         hls.attachMedia(video);
       } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
         video.src = this.video.src;
-        video.addEventListener("loadedmetadata", this._manifestParsed);
+        video.addEventListener("loadedmetadata", this.manifestParsed);
       }
     },
-    _manifestParsed() {
-      let video = this.$refs.video;
+    manifestParsed() {
+      const { video } = this.$refs;
       video.play();
       setTimeout(() => {
         this.loaded = true;
