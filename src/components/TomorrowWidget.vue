@@ -4,7 +4,7 @@
     <h1 class="text-4xl font-semibold hidden sm:block">Погода</h1>
     <div v-if="$isLoading">Загрузка данных...</div>
     <div v-else>
-      <div class="text-center mb-5">
+      <div class="text-center mb-5 mt-2 sm:mt-0">
         <div class="text-8xl font-extralight">
           {{ currentTemp }}<sup>°</sup>
         </div>
@@ -128,30 +128,43 @@ export default {
       window.location.reload();
     },
     async fetchWeatherData() {
-      // Проверяем, есть ли данные в локальном хранилище
       const cachedData = localStorage.getItem("tomorrowioData");
-
       let weatherData = null;
+
       if (cachedData) {
-        // Если данные есть в кеше, возвращаем их
-        weatherData = JSON.parse(cachedData);
-      } else {
+        const { data, timestamp } = JSON.parse(cachedData);
+        const currentTime = new Date().getTime();
+        const sixHoursInMilliseconds = 6 * 60 * 60 * 1000;
+
+        if (currentTime - timestamp < sixHoursInMilliseconds) {
+          weatherData = data;
+        } else {
+          localStorage.removeItem("tomorrowioData");
+        }
+      }
+
+      if (!weatherData) {
         weatherData = await this.$http.get(
           `${getTimelineURL}?${getTimelineParameters}`,
         );
-        localStorage.setItem("tomorrowioData", JSON.stringify(weatherData));
+        const currentTime = new Date().getTime();
+        localStorage.setItem(
+          "tomorrowioData",
+          JSON.stringify({ data: weatherData, timestamp: currentTime }),
+        );
       }
 
-      weatherData.data.timelines.forEach((element) => {
-        if (element.timestep === "current") {
-          const [firstInterval] = element.intervals;
-          this.weatherData.current = firstInterval;
-        } else if (element.timestep === "1d") {
-          this.weatherData.daily = element.intervals;
-        } else if (element.timestep === "1h") {
-          this.weatherData.hourly = element.intervals;
-        }
-      });
+      const { timelines } = weatherData.data;
+      const {
+        intervals: [firstInterval],
+      } = timelines.find((element) => element.timestep === "current");
+      this.weatherData.current = firstInterval;
+      this.weatherData.daily = timelines.find(
+        (element) => element.timestep === "1d",
+      ).intervals;
+      this.weatherData.hourly = timelines.find(
+        (element) => element.timestep === "1h",
+      ).intervals;
     },
   },
   computed: {

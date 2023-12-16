@@ -17,6 +17,10 @@
         <img :src="Snowflake" class="h-6 inline" alt="" />
         <span>{{ Math.round(timeline.values.snowIntensity) }} mm/час</span>
       </div>
+      <div class="" v-if="timeline.values.snowAccumulation">
+        Снег:
+        <span>{{ Math.round(timeline.values.snowAccumulation) }} mm</span>
+      </div>
       <!-- <div class="" v-else>Снег не идет</div> -->
       <div class="">
         Ветер:
