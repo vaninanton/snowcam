@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@bybas/weather-icons": "^2.0.0",
-    "axios": "^1.6.1",
+    "axios": "^1.6.3",
     "dayjs": "^1.11.10",
     "hls.js": "^1.4.12",
     "ios-pwa-splash": "^1.0.0",
