@@ -20,7 +20,7 @@
     "ios-pwa-splash": "^1.0.0",
     "moment": "^2.29.4",
     "query-string": "^8.1.0",
-    "vue": "^3.3.8"
+    "vue": "^3.4.15"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.4.1",
