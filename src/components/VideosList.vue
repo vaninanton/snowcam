@@ -5,54 +5,29 @@ const VideoItem = defineAsyncComponent(() => import("./VideoItem.vue"));
 
 const videos = [
   {
-    title: "Чимба",
-    description:
-      "Верхняя станция, камера в сторону сноупарка и Ледника Богдановича",
+    title: "Ледник Богдановича",
+    description: "Верхняя станция",
     src: "https://ipcam.kz/cam6/index.m3u8",
     poster: "/previews/3212b47c65ccc0cb9759f5c08632c563.jpg",
   },
   {
-    title: "Чимба",
-    description: "Средняя станция, где ларек с хот-догами",
+    title: "Средняя станция",
+    description: "Средняя станция",
     src: "https://ipcam.kz/cam5/index.m3u8",
     poster: "/previews/ffa10e45b1d87ab0aa8796bc7969046b.jpg",
   },
   {
-    title: "Чимба",
-    description: "Бугель на базовой станции",
+    title: "Бугель",
+    description: "Базовая станция",
     src: "https://ipcam.kz/cam2/index.m3u8",
     poster: "/previews/d5361ff25a96271df9ac614d9138806a.jpg",
   },
   {
-    title: "Чимба",
+    title: "Подъемник",
     description: "Базовая станция",
     src: "https://ipcam.kz/cam1/index.m3u8",
     poster: "/previews/197f1dde9a2c929cca5496f225cc2d62.jpg",
   },
-  // {
-  //   title: "Лесная сказка",
-  //   description: "Old Skazka",
-  //   src: "https://s46.ipcamlive.com/streams/2egmov7mp1rwfdwn4/stream.m3u8",
-  //   poster: "/previews/197f1dde9a2c929cca5496f225cc2d62.jpg",
-  // },
-  // {
-  //   title: "Лесная сказка",
-  //   description: "Склон Irbis",
-  //   src: "https://s10.ipcamlive.com/streams/0aw85cpkzrhfwpjxg/stream.m3u8",
-  //   poster: "/previews/197f1dde9a2c929cca5496f225cc2d62.jpg",
-  // },
-  // {
-  //   title: "Лесная сказка",
-  //   description: "Lift A",
-  //   src: "https://s75.ipcamlive.com/streams/4bucjko3eixri8xps/stream.m3u8",
-  //   poster: "/previews/197f1dde9a2c929cca5496f225cc2d62.jpg",
-  // },
-  // {
-  //   title: "Лесная сказка",
-  //   description: "Lift C",
-  //   src: "https://s10.ipcamlive.com/streams/0anazyiyo1m8uotb2/stream.m3u8",
-  //   poster: "/previews/197f1dde9a2c929cca5496f225cc2d62.jpg",
-  // },
 ];
 </script>
 <template>

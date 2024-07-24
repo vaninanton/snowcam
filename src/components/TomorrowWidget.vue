@@ -1,7 +1,6 @@
 <script setup></script>
 <template>
   <div>
-    <h1 class="text-4xl font-semibold hidden sm:block">Погода</h1>
     <div v-if="$isLoading">Загрузка данных...</div>
     <div v-else>
       <div class="text-center mb-5 mt-2 sm:mt-0">
