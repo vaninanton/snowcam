@@ -32,11 +32,7 @@ const videos = [
 </script>
 <template>
   <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-1 mx-auto">
-    <li
-      class="group relative rounded-3xl bg-slate-50 p-6 lg:p-0 dark:bg-slate-800/80 dark:highlight-white/5 hover:bg-slate-100 dark:hover:bg-slate-700/50"
-      v-for="video in videos"
-      v-bind:key="video.title"
-    >
+    <li class="relative" v-for="video in videos" v-bind:key="video.title">
       <VideoItem :video="video" />
     </li>
   </ul>
