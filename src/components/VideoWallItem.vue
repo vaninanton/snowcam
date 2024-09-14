@@ -1,7 +1,5 @@
 <template>
-  <div
-    class="aspect-video relative transform overflow-hidden shadow-[0_2px_8px_rgba(15,23,42,0.08)] bg-slate-200 dark:bg-slate-700"
-  >
+  <div class="aspect-video relative transform overflow-hidden">
     <img
       alt=""
       fetchpriority="high"
