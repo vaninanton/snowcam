@@ -1,3 +1,4 @@
+import { resolve } from "path";
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 import mkcert from "vite-plugin-mkcert";
@@ -9,6 +10,10 @@ export default defineConfig({
   build: {
     chunkSizeWarningLimit: 1600,
     rollupOptions: {
+      input: {
+        app: resolve(__dirname, "index.html"),
+        appVideoWall: resolve(__dirname, "videowall.html"),
+      },
       output: {
         manualChunks(id) {
           if (id.includes("node_modules")) {
