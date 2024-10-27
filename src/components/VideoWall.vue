@@ -1,7 +1,7 @@
 <script setup>
 import { defineAsyncComponent } from "vue";
 
-const VideoItem = defineAsyncComponent(() => import("./VideoWallItem.vue"));
+const VideoWallItem = defineAsyncComponent(() => import("./VideoWallItem.vue"));
 
 const videos = [
   {
@@ -31,9 +31,9 @@ const videos = [
 ];
 </script>
 <template>
-  <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-1 mx-auto">
+  <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 mx-auto">
     <li class="relative" v-for="video in videos" v-bind:key="video.title">
-      <VideoItem :video="video" />
+      <VideoWallItem :video="video" />
     </li>
   </ul>
 </template>
