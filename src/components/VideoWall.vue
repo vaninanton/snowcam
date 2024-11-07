@@ -14,7 +14,7 @@ const videos = [
     title: "Средняя станция",
     description: "Средняя станция",
     src: "https://ipcam.kz/cam5/index.m3u8",
-    poster: "/previews/ffa10e45b1d87ab0aa8796bc7969046b.jpg",
+    poster: "/previews/ffa10e45b1d87ab0aa8796bc7969046c.jpg",
   },
   {
     title: "Бугель",
