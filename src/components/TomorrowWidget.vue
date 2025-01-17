@@ -124,6 +124,7 @@ export default {
   methods: {
     reload() {
       localStorage.removeItem("tomorrowioData");
+      document.cookie = "addToHomescreenCalled=; Max-Age=-99999999;";
       window.location.reload();
     },
     async fetchWeatherData() {
