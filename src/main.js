@@ -3,11 +3,18 @@ import "./style.css";
 import iosPWASplash from "ios-pwa-splash/index";
 import App from "./App.vue";
 import httpPlugin from "./http";
-import Icon from "./splashscreen.png";
+import SplashscreenImage from "./splashscreen.png";
+import AddToHomescreen from "@owliehq/vue-addtohomescreen";
 
 const app = createApp(App);
 app.config.globalProperties.$isLoading = false;
 app.use(httpPlugin);
+app.use(AddToHomescreen, {
+  title: "SnowCam",
+  content: "Можно установить как приложение на homescreen!",
+  iconPath: "/android-chrome-512x512.png",
+  lang: "ru_RU",
+});
 app.mount("#app");
 
-iosPWASplash(Icon, "#0f172a");
+iosPWASplash(SplashscreenImage, "#0f172a");
