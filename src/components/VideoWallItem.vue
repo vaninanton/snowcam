@@ -19,7 +19,6 @@
         muted
         allowfulscreen
         playsinline
-        @click="getScreenshot"
       ></video>
     </div>
   </div>
@@ -57,27 +56,6 @@ export default {
       setTimeout(() => {
         this.loaded = true;
       }, 1000);
-    },
-    getScreenshot() {
-      const { video } = this.$refs;
-      const canvas = document.createElement("canvas");
-      canvas.width = 1280;
-      canvas.height = 720;
-
-      canvas
-        .getContext("2d")
-        .drawImage(video, 0, 0, canvas.width, canvas.height);
-      const dataURI = canvas.toDataURL("image/png");
-
-      const link = document.createElement("a");
-      link.style.display = "none";
-      link.setAttribute("download", "image.png");
-      link.setAttribute(
-        "href",
-        dataURI.replace("image/png", "image/octet-stream"),
-      );
-      document.body.appendChild(link);
-      link.click();
     },
   },
   mounted() {
