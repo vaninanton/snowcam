@@ -6,7 +6,6 @@ import httpPlugin from "./http";
 import Icon from "./splashscreen.png";
 
 const app = createApp(App);
-app.config.globalProperties.$isLoading = false;
 app.use(httpPlugin);
 app.mount("#app");
 

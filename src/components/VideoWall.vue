@@ -10,6 +10,7 @@
 </template>
 <script>
 import VideoWallItem from "./VideoWallItem.vue";
+import videos from "../videos";
 
 export default {
   components: {
@@ -17,36 +18,11 @@ export default {
   },
   data() {
     return {
-      videos: [
-        {
-          title: "Ледник Богдановича",
-          description: "Верхняя станция",
-          src: "https://ipcam.kz/cam6/index.m3u8",
-          poster: "/previews/3212b47c65ccc0cb9759f5c08632c563.jpg",
-        },
-        {
-          title: "Средняя станция",
-          description: "Средняя станция",
-          src: "https://ipcam.kz/cam5/index.m3u8",
-          poster: "/previews/ffa10e45b1d87ab0aa8796bc7969046c.jpg",
-        },
-        {
-          title: "Бугель",
-          description: "Базовая станция",
-          src: "https://ipcam.kz/cam2/index.m3u8",
-          poster: "/previews/d5361ff25a96271df9ac614d9138806a.jpg",
-        },
-        {
-          title: "Подъемник",
-          description: "Базовая станция",
-          src: "https://ipcam.kz/cam1/index.m3u8",
-          poster: "/previews/197f1dde9a2c929cca5496f225cc2d62.jpg",
-        },
-      ],
+      videos,
     };
   },
   methods: {
-    capture() {
+    async capture() {
       const canvas = document.createElement("canvas");
       const context = canvas.getContext("2d");
       canvas.width = 2560;
@@ -81,19 +57,43 @@ export default {
         720,
       );
 
-      const dataURI = canvas.toDataURL("image/png");
+      const dataURI = canvas.toDataURL("image/jpeg");
 
-      let yourDate = new Date();
+      if ((await this.navShare(dataURI)) === false) {
+        this.saveFile(dataURI);
+      }
+    },
+    async navShare(dataURI) {
+      if (!navigator.canShare) {
+        console.error("navigator.share is not available");
+        return false;
+      }
 
+      const blob = await (await fetch(dataURI)).blob();
+      const file = new File(
+        [blob],
+        "snowcam.vaninanton.ru-" + new Date().toISOString() + ".jpg",
+        { type: blob.type },
+      );
+      if (!navigator.canShare({ files: [file] })) {
+        console.error("navigator.share couldnt share files");
+        return false;
+      }
+      navigator.share({ files: [file] });
+
+      return true;
+    },
+    saveFile(dataURI) {
+      console.log("saveFile");
       const link = document.createElement("a");
       link.style.display = "none";
       link.setAttribute(
         "download",
-        "snowcam.vaninanton.ru-" + yourDate.toISOString() + ".png",
+        "snowcam.vaninanton.ru-" + new Date().toISOString() + ".jpg",
       );
       link.setAttribute(
         "href",
-        dataURI.replace("image/png", "image/octet-stream"),
+        dataURI.replace("image/jpeg", "image/octet-stream"),
       );
       document.body.appendChild(link);
       link.click();
