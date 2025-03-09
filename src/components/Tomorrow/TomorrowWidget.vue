@@ -30,12 +30,11 @@
 <script>
 import queryString from "query-string";
 import moment from "moment/min/moment-with-locales";
-import TimelineItem from "./Tomorrow/TimelineItem.vue";
+import TimelineItem from "./TimelineItem.vue";
 
 moment.locale("ru");
 
 const getTimelineURL = "https://api.tomorrow.io/v4/timelines";
-const apikey = "doNdD2yT8uRWMF8Mkf5JJFNuasSurjfN";
 const location = [43.120649, 77.096193];
 const fieldsList = {
   temperature: 'The "real" temperature measurement (at 2m)',
@@ -94,7 +93,7 @@ const endTime = moment.utc(now).add(1, "days").toISOString();
 const timezone = "Asia/Almaty";
 const getTimelineParameters = queryString.stringify(
   {
-    apikey,
+    apikey: import.meta.env.VITE_TOMORROW_API_KEY,
     location,
     fields,
     units,

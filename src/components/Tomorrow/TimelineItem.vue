@@ -17,12 +17,12 @@
         <img :src="Snowflake" class="h-6 inline" alt="" />
         <span>{{ Math.round(timeline.values.snowIntensity) }} mm/час</span>
       </div>
-      <div class="" v-if="timeline.values.snowAccumulation">
+      <div class="" v-if="timeline.values.snowAccumulationMax">
         Снег:
-        <span>{{ Math.round(timeline.values.snowAccumulation) }} mm</span>
+        <span>{{ Math.round(timeline.values.snowAccumulationMax) }} mm</span>
       </div>
       <!-- <div class="" v-else>Снег не идет</div> -->
-      <div class="">
+      <!-- <div class="">
         Ветер:
         <WindCompass :windDirection="timeline.values.windDirection" />
         {{ Math.round(timeline.values.windSpeed) }} m/s
@@ -32,7 +32,7 @@
         >
           Порывы {{ Math.round(timeline.values.windGust) }} m/s
         </div>
-      </div>
+      </div> -->
     </div>
   </div>
 </template>
@@ -66,7 +66,7 @@ export default {
       if (this.isCurrent) {
         return "Сейчас";
       }
-      return moment(this.timeline.startTime).format("HH");
+      return moment(this.timeline.startTime).format("HH") + ":00";
     },
     temperature() {
       return Math.floor(this.timeline.values.temperature);

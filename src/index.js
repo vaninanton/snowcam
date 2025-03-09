@@ -1,7 +1,7 @@
 import { createApp } from "vue";
 import "./style.css";
 import iosPWASplash from "ios-pwa-splash/index";
-import App from "./App.vue";
+import App from "./Index.vue";
 import httpPlugin from "./http";
 import SplashscreenImage from "./splashscreen.png";
 import AddToHomescreen from "@owliehq/vue-addtohomescreen";
