@@ -13,7 +13,6 @@ export default defineConfig({
       input: {
         app: resolve(__dirname, "index.html"),
         appVideoWall: resolve(__dirname, "videowall.html"),
-        appTma: resolve(__dirname, "tma.html"),
       },
       output: {
         manualChunks(id) {

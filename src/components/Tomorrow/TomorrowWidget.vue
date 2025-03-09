@@ -4,11 +4,8 @@
     <div v-if="$isLoading">Загрузка данных...</div>
     <div v-else>
       <div class="text-center mb-5 mt-2 sm:mt-0">
-        <div class="text-8xl font-extralight">
+        <div class="text-8xl font-extralight cursor-pointer" @click="reload">
           {{ currentTemp }}<sup>°</sup>
-        </div>
-        <div class="font-medium cursor-pointer" @click="reload">
-          Перезагрузить
         </div>
       </div>
 
