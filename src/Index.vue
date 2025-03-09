@@ -2,7 +2,7 @@
 import { defineAsyncComponent } from "vue";
 
 const TomorrowWidget = defineAsyncComponent(
-  () => import("./components/TomorrowWidget.vue"),
+  () => import("./components/Tomorrow/TomorrowWidget.vue"),
 );
 const VideosList = defineAsyncComponent(
   () => import("./components/VideosList.vue"),
