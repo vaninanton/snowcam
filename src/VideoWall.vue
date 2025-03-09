@@ -43,7 +43,6 @@ export default {
           const item = new ClipboardItem({ "image/png": blob });
 
           navigator.clipboard.write([item]);
-          console.log("copied!");
         });
       } catch (error) {
         setTimeout(() => {

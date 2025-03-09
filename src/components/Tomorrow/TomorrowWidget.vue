@@ -153,7 +153,6 @@ export default {
         );
       }
 
-      console.log(weatherData);
       const { timelines } = weatherData.data;
       const {
         intervals: [firstInterval],
