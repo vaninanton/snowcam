@@ -1,5 +1,4 @@
 <template>
-  <div class="" v-on="{ click: capture }">123</div>
   <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 mx-auto">
     <li class="relative" v-for="video in videos" v-bind:key="video.title">
       <HlsVideo
