@@ -16,7 +16,7 @@
     "@bybas/weather-icons": "^2.0.0",
     "@owliehq/vue-addtohomescreen": "^2.0.3",
     "axios": "^1.11.0",
-    "dayjs": "^1.11.13",
+    "dayjs": "^1.11.18",
     "hls.js": "^1.6.10",
     "ios-pwa-splash": "^1.0.0",
     "moment": "^2.30.1",
