@@ -113,7 +113,7 @@ onMounted(() => {
     <div v-if="$isLoading">Загрузка данных...</div>
     <div v-else>
       <div
-        class="flex flex-row items-center gap-4 mb-2 mt-0 px-1 sm:px-0 sm:max-w-2xl sm:mx-auto"
+        class="flex flex-row items-center gap-4 mb-2 my-4 px-1 sm:px-0 sm:max-w-2xl sm:mx-auto"
       >
         <div class="flex items-center gap-3 shrink-0 cursor-pointer">
           <WeatherIcon

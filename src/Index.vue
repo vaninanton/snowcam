@@ -26,7 +26,7 @@ watch(activePlace, (val) => {
 });
 
 const videosByPlace = computed(() =>
-  videos.filter((v) => v.place === activePlace.value),
+  videos.filter((v) => v.place === activePlace.value && v.src),
 );
 
 const TomorrowWidget = defineAsyncComponent(
@@ -50,7 +50,7 @@ function clearCacheAndReload() {
   <TomorrowWidget />
   <div
     v-if="places.length > 1"
-    class="flex border-b border-slate-700 mb-2 sm:px-6 xl:px-8 gap-0"
+    class="flex border-b border-slate-700 mt-2 mb-2 sm:px-6 xl:px-8 gap-0"
   >
     <button
       v-for="place in places"
