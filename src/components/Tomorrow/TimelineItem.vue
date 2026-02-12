@@ -1,6 +1,6 @@
 <template>
   <div
-    class="w-16 min-w-[4rem] p-1.5 h-full flex flex-col justify-between text-center text-xs"
+    class="w-16 min-w-16 p-1.5 h-full flex flex-col justify-between text-center text-xs"
     :class="{ 'bg-white/10': isCurrent }"
   >
     <div>

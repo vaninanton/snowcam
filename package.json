@@ -10,7 +10,8 @@
     "format": "prettier --write src/",
     "preview": "vite preview --host=0.0.0.0",
     "prepare": "husky",
-    "test": "echo \"Error: no test specified\" && exit 0"
+    "test": "echo \"Error: no test specified\" && exit 0",
+    "videos:fill-src": "node scripts/fill-ipcamlive-src.js"
   },
   "dependencies": {
     "@bybas/weather-icons": "^2.0.0",
