@@ -1,5 +1,5 @@
 <template>
-  <video :src="src" ref="videoItem"></video>
+  <video :src="src" :poster="poster" ref="videoItem"></video>
 </template>
 
 <script setup>
@@ -8,6 +8,7 @@ import Hls from "hls.js";
 
 const props = defineProps({
   src: String,
+  poster: { type: String, default: "" },
 });
 
 const videoItem = ref(null);

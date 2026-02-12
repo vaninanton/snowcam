@@ -1,77 +1,48 @@
 <template>
   <div
-    class="w-22 p-2 h-full flex flex-col justify-between text-center text-xs"
+    class="w-16 min-w-[4rem] p-1.5 h-full flex flex-col justify-between text-center text-xs"
     :class="{ 'bg-white/10': isCurrent }"
   >
     <div>
-      <div class="font-normal mb-2">{{ startTime }}</div>
-      <weatherIcon class="w-12 mx-auto" :timeline="timeline"></weatherIcon>
+      <div class="font-normal mb-0.5">{{ startTime }}</div>
+      <WeatherIcon class="w-8 h-8 mx-auto block" :timeline="timeline" />
 
-      <div>
-        <span class="font-bold text-lg">{{ temperature }}<sup>°</sup></span>
-        <span class="font-light" v-if="temperature != temperatureApparent"
-          >({{ temperatureApparent }}<sup>°</sup>)</span
+      <div class="whitespace-nowrap">
+        <span class="font-bold text-sm">{{ temperature }}<sup>°</sup></span>
+        <span class="font-light" v-if="temperature !== temperatureApparent">
+          ({{ temperatureApparent }}<sup>°</sup>)</span
         >
       </div>
     </div>
   </div>
 </template>
-<script>
-import Snowflake from "@bybas/weather-icons/design/fill/animation-ready/snowflake.svg";
+
+<script setup>
+import { computed } from "vue";
 import moment from "moment/min/moment-with-locales";
 import WeatherIcon from "./WeatherIcon.vue";
-import WindCompass from "./WindCompass.vue";
-import { getDayIcon, getNightIcon } from "./GetIcon";
 
 moment.locale("ru");
 
-export default {
-  props: {
-    timeline: Object,
-  },
-  components: {
-    WindCompass,
-    WeatherIcon,
-  },
-  data() {
-    return {
-      Snowflake,
-    };
-  },
-  computed: {
-    isCurrent() {
-      return moment(this.timeline.startTime).isSame(moment().startOf("hour"));
-    },
-    startTime() {
-      if (this.isCurrent) {
-        return "Сейчас";
-      }
-      return moment(this.timeline.startTime).format("HH") + ":00";
-    },
-    temperature() {
-      return Math.floor(this.timeline.values.temperature);
-    },
-    temperatureApparent() {
-      return Math.floor(this.timeline.values.temperatureApparent);
-    },
-    icon() {
-      if (
-        moment(this.timeline.startTime).isSameOrAfter(
-          this.timeline.values.sunsetTime,
-        ) ||
-        moment(this.timeline.startTime).isSameOrBefore(
-          this.timeline.values.sunriseTime,
-        )
-      ) {
-        return getNightIcon(this.timeline.values.weatherCode);
-      }
+const props = defineProps({
+  timeline: { type: Object, required: true },
+});
 
-      return getDayIcon(this.timeline.values.weatherCode);
-    },
-    description() {
-      return this.timeline.values.weatherCode;
-      // return GetIcon(this.timeline.values.weatherCode)?.text;
-    },
-  },
-};
+const isCurrent = computed(() =>
+  moment(props.timeline.startTime).isSame(moment().startOf("hour")),
+);
+
+const startTime = computed(() =>
+  isCurrent.value
+    ? "Сейчас"
+    : moment(props.timeline.startTime).format("HH") + ":00",
+);
+
+const temperature = computed(() =>
+  Math.floor(props.timeline.values.temperature),
+);
+
+const temperatureApparent = computed(() =>
+  Math.floor(props.timeline.values.temperatureApparent),
+);
 </script>
