@@ -1,0 +1,26 @@
+---
+description: Стандарты JavaScript и линтинг в SnowCam
+globs: "**/*.js"
+alwaysApply: false
+---
+
+# JavaScript — стандарты
+
+- **ES modules** (`import`/`export`). Конфиги (`.eslintrc.cjs`) — CommonJS где нужно.
+- **ESLint**: конфиг `airbnb-base` + `plugin:vue/vue3-essential`. Длина строки: **max-len 200**.
+- **Prettier**: форматирование по `npm run format` (целевая папка `src/`). В pre-commit через lint-staged для `*.{js,vue}`.
+- Строки — **двойные кавычки** (`"..."`).
+- Именование: **camelCase** для переменных и функций, **PascalCase** только для компонентов/классов.
+- Данные камер и точки входа: отдельные модули с `export default` (массив или конфиг), например `src/videos.js`, `src/videowall.js`.
+- Плагины Vue — объект с методом `install(app)` (см. `src/http.js`).
+
+## Пример
+
+```javascript
+// ✅ GOOD
+import axios from "axios";
+const client = axios.create({});
+export default { install: (app) => { ... } };
+```
+
+Перед коммитом: `npm run eslint` и `npm run format`.

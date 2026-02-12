@@ -1,0 +1,33 @@
+---
+description: Конвенции Vue 3 в проекте SnowCam
+globs: "**/*.vue"
+alwaysApply: false
+---
+
+# Vue 3 — конвенции
+
+- Использовать **Vue 3 Composition API** и **`<script setup>`**.
+- Имена компонентов — **PascalCase** (например `HlsVideo`, `TomorrowWidget`, `VersionString`).
+- Тяжёлые компоненты подключать через **`defineAsyncComponent`** в родителе (см. `Index.vue`).
+- Строки в кавычках — **двойные** (`"..."`).
+- Стили: **Tailwind CSS** (утилитарные классы в шаблоне). Глобальные стили — в `src/style.css` с `@import "tailwindcss"`.
+- Плагины: глобальные `$http`, `$isLoading` задаются в `src/http.js`; доступ в шаблоне через `$http`, `$isLoading`.
+- Именование: `camelCase` для переменных и методов, `PascalCase` для компонентов и имён файлов компонентов (например `HlsVideo.vue`).
+
+## Пример структуры компонента
+
+```vue
+<template>
+  <div>...</div>
+</template>
+
+<script setup>
+import { ref, onMounted } from "vue";
+
+const props = defineProps({ ... });
+const emit = defineEmits([...]);
+// логика
+</script>
+```
+
+При необходимости второй `<script>` без `setup` (как в `TomorrowWidget.vue`) — использовать для импортов и констант, не входящих в реактивность.
