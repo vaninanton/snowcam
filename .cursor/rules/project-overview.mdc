@@ -1,0 +1,41 @@
+---
+description: Обзор проекта SnowCam — стек, структура, команды
+alwaysApply: true
+---
+
+# SnowCam — обзор проекта
+
+Веб-приложение для просмотра веб-камер и погоды горнолыжного курорта Шымбулак. PWA с HLS-потоками и виджетом погоды (Tomorrow.io).
+
+## Стек
+
+- **Vue 3** (Composition API, `<script setup>`)
+- **Vite 7** — сборка и dev-сервер
+- **Tailwind CSS 4** — стили (`@tailwindcss/vite`)
+- **HLS.js** — воспроизведение HLS
+- **axios** — HTTP (через плагин `src/http.js`, глобальные `$http`, `$isLoading`)
+- Язык: **JavaScript** (ES modules), без TypeScript
+
+## Структура
+
+- `index.html` / `src/index.js` — основное приложение (камеры + погода)
+- `videowall.html` / `src/videowall.js` — отдельная точка входа «видеостена»
+- `src/Index.vue`, `src/VideoWall.vue` — корневые компоненты
+- `src/components/` — переиспользуемые компоненты (в т.ч. `Tomorrow/` для погоды)
+- `src/videos.js`, `src/videowall.js` — данные камер (массивы объектов с `title`, `src`, `poster`)
+- `src/http.js` — Vue-плагин для axios
+- Конфиг: `vite.config.js` (multi-page: app + appVideoWall), `.eslintrc.cjs` (airbnb-base + vue3-essential)
+
+## Команды
+
+- `npm run dev` — dev с HTTPS (mkcert)
+- `npm run build` — сборка в `dist/`
+- `npm run preview` — просмотр сборки
+- `npm run eslint` — ESLint с автофиксом
+- `npm run format` — Prettier по `src/`
+
+## Деплой
+
+GitHub Actions при пуше в `main` (`.github/workflows/deploy.yml`). Секреты: `VITE_TOMORROW_API_KEY`, опционально `TELEGRAM_TOKEN`, `TELEGRAM_TO`. Продакшен: https://snowcam.vaninanton.ru
+
+При добавлении кода: соблюдать ESLint (airbnb-base, max-len 200), Prettier, Vue 3 Composition API и существующую структуру файлов.
