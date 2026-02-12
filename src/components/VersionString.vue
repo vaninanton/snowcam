@@ -1,12 +1,24 @@
 <script setup>
+defineEmits(["click"]);
+
 const version = import.meta.env.VITE_BUILD_VERSION;
 </script>
+
 <template>
   <div
-    class="bottom-0 right-0 text-right text-xs pr-4 pb-2"
+    class="bottom-0 right-0 text-right text-xs pr-4 pb-2 cursor-pointer hover:underline"
     v-if="version"
     v-once
+    @click="$emit('click')"
   >
     ver: {{ version.slice(0, 7) }}
+  </div>
+  <div
+    class="bottom-0 right-0 text-right text-xs pr-4 pb-2 cursor-pointer hover:underline"
+    v-else
+    v-once
+    @click="$emit('click')"
+  >
+    ver: develop
   </div>
 </template>

@@ -1,12 +1,7 @@
-import { createApp } from "vue";
-import "./style.css";
-import iosPWASplash from "ios-pwa-splash/index";
+import createSnowCamApp from "./app";
 import App from "./VideoWall.vue";
-import httpPlugin from "./http";
-import Icon from "./splashscreen.png";
+import SplashscreenImage from "./splashscreen.png";
 
-const app = createApp(App);
-app.use(httpPlugin);
-app.mount("#app");
-
-iosPWASplash(Icon, "#0f172a");
+createSnowCamApp(App, {
+  splashImage: SplashscreenImage,
+});

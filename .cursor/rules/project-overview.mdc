@@ -20,9 +20,10 @@ alwaysApply: true
 
 - `index.html` / `src/index.js` — основное приложение (камеры + погода)
 - `videowall.html` / `src/videowall.js` — отдельная точка входа «видеостена»
+- `src/app.js` — общая фабрика приложения `createSnowCamApp(RootComponent, options)`
 - `src/Index.vue`, `src/VideoWall.vue` — корневые компоненты
 - `src/components/` — переиспользуемые компоненты (в т.ч. `Tomorrow/` для погоды)
-- `src/videos.js`, `src/videowall.js` — данные камер (массивы объектов с `title`, `src`, `poster`)
+- `src/videos.js` — данные камер (массив объектов с `title`, `src`, `poster`)
 - `src/http.js` — Vue-плагин для axios
 - Конфиг: `vite.config.js` (multi-page: app + appVideoWall), `.eslintrc.cjs` (airbnb-base + vue3-essential)
 

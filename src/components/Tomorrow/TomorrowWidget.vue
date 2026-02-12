@@ -1,16 +1,200 @@
-<script setup></script>
+<script setup>
+import { ref, computed, onMounted, getCurrentInstance } from "vue";
+import TimelineItem from "./TimelineItem.vue";
+import WeatherIcon from "./WeatherIcon.vue";
+import WindCompass from "./WindCompass.vue";
+import { TOMORROW_TIMELINE_URL, buildTimelineQueryString } from "./config";
+
+const weatherData = ref({
+  current: null,
+  daily: null,
+  hourly: null,
+});
+
+const current = computed(() => weatherData.value.current);
+const values = computed(() => current.value?.values ?? {});
+
+const currentTemp = computed(() => {
+  const v = values.value.temperature;
+  return v != null ? Math.floor(v) : "-";
+});
+
+const feelsLike = computed(() => {
+  const v = values.value.temperatureApparent;
+  return v != null ? Math.floor(v) : null;
+});
+
+const windSpeed = computed(() => {
+  const v = values.value.windSpeed;
+  return v != null ? Math.round(Number(v)) : null;
+});
+
+const windDirection = computed(() => {
+  const v = values.value.windDirection;
+  return v != null ? Number(v) : null;
+});
+
+const windGust = computed(() => {
+  const v = values.value.windGust;
+  return v != null ? Math.round(Number(v)) : null;
+});
+
+const visibilityKm = computed(() => {
+  const v = values.value.visibility;
+  if (v == null) return null;
+  const num = Number(v);
+  // API при units=metric возвращает видимость уже в км
+  const km = num >= 1000 ? num / 1000 : num;
+  return km >= 1 ? Math.round(km) : km.toFixed(1);
+});
+
+const snowDepthCm = computed(() => {
+  const v = values.value.snowDepth;
+  return v != null ? Math.round(Number(v)) : null;
+});
+
+const humidity = computed(() => {
+  const v = values.value.humidity;
+  return v != null ? Math.round(Number(v)) : null;
+});
+
+const precipProbability = computed(() => {
+  const v = values.value.precipitationProbability;
+  return v != null ? Math.round(Number(v)) : null;
+});
+
+async function fetchWeatherData() {
+  const instance = getCurrentInstance();
+  const $http = instance?.appContext?.config?.globalProperties?.$http;
+  if (!$http) return;
+
+  const cachedData = localStorage.getItem("tomorrowioData");
+  let data = null;
+
+  if (cachedData) {
+    const parsed = JSON.parse(cachedData);
+    const sixHoursMs = 6 * 60 * 60 * 1000;
+    if (Date.now() - parsed.timestamp < sixHoursMs) {
+      data = parsed.data;
+    } else {
+      localStorage.removeItem("tomorrowioData");
+    }
+  }
+
+  if (!data) {
+    data = await $http.get(
+      `${TOMORROW_TIMELINE_URL}?${buildTimelineQueryString()}`,
+    );
+    localStorage.setItem(
+      "tomorrowioData",
+      JSON.stringify({ data, timestamp: Date.now() }),
+    );
+  }
+
+  const { timelines } = data.data;
+  const currentTimeline = timelines.find((el) => el.timestep === "current");
+  const dailyTimeline = timelines.find((el) => el.timestep === "1d");
+  const hourlyTimeline = timelines.find((el) => el.timestep === "1h");
+
+  weatherData.value = {
+    current: currentTimeline?.intervals?.[0] ?? null,
+    daily: dailyTimeline?.intervals ?? null,
+    hourly: hourlyTimeline?.intervals ?? null,
+  };
+}
+
+onMounted(() => {
+  fetchWeatherData();
+});
+</script>
+
 <template>
   <div>
     <div v-if="$isLoading">Загрузка данных...</div>
     <div v-else>
-      <div class="text-center mb-5 mt-2 sm:mt-0">
-        <div class="text-8xl font-extralight cursor-pointer" @click="reload">
-          {{ currentTemp }}<sup>°</sup>
+      <div
+        class="flex flex-row items-center gap-4 mb-2 mt-0 px-1 sm:px-0 sm:max-w-2xl sm:mx-auto"
+      >
+        <div class="flex items-center gap-3 shrink-0 cursor-pointer">
+          <WeatherIcon
+            v-if="current"
+            :timeline="current"
+            class="w-14 h-14 sm:w-16 sm:h-16 shrink-0"
+          />
+          <div>
+            <div class="text-4xl sm:text-5xl font-extralight leading-none">
+              {{ currentTemp }}<sup>°</sup>
+            </div>
+            <p v-if="feelsLike !== null" class="text-slate-500 text-xs mt-0.5">
+              Ощущается {{ feelsLike }}°
+            </p>
+          </div>
+        </div>
+        <div
+          class="text-slate-400 text-xs min-w-0 flex-1 flex flex-wrap items-baseline gap-x-1 gap-y-0.5"
+        >
+          <template v-if="windSpeed !== null">
+            <span class="whitespace-nowrap inline-flex items-center gap-1">
+              <WindCompass
+                v-if="windDirection !== null"
+                :wind-direction="windDirection"
+                class="inline-block text-sm align-middle mr-0.5 shrink-0"
+              />
+              <span
+                >Ветер {{ windSpeed }} м/с<span
+                  v-if="windGust !== null && windGust > windSpeed"
+                >
+                  (до {{ windGust }})</span
+                ></span
+              >
+            </span>
+          </template>
+          <template v-if="visibilityKm !== null">
+            <span v-if="windSpeed !== null" class="text-slate-600">·</span>
+            <span class="whitespace-nowrap"
+              >Видимость {{ visibilityKm }} км</span
+            >
+          </template>
+          <template v-if="snowDepthCm !== null">
+            <span
+              v-if="windSpeed !== null || visibilityKm !== null"
+              class="text-slate-600"
+              >·</span
+            >
+            <span class="whitespace-nowrap">Снег {{ snowDepthCm }} см</span>
+          </template>
+          <template v-if="humidity !== null">
+            <span
+              v-if="
+                windSpeed !== null ||
+                visibilityKm !== null ||
+                snowDepthCm !== null
+              "
+              class="text-slate-600"
+              >·</span
+            >
+            <span class="whitespace-nowrap">Влажность {{ humidity }}%</span>
+          </template>
+          <template v-if="precipProbability !== null && precipProbability > 0">
+            <span
+              v-if="
+                windSpeed !== null ||
+                visibilityKm !== null ||
+                snowDepthCm !== null ||
+                humidity !== null
+              "
+              class="text-slate-600"
+              >·</span
+            >
+            <span class="whitespace-nowrap"
+              >Осадки {{ precipProbability }}%</span
+            >
+          </template>
         </div>
       </div>
 
       <div
-        class="flex snap-x snap-mandatory overflow-x-scroll max-w-full divide-x divide-gray-800 bg-white/5"
+        class="flex snap-x snap-mandatory overflow-x-scroll w-full divide-x divide-gray-800 bg-white/5 py-1 min-w-0"
       >
         <div
           class="flex-1 transition-colors"
@@ -23,156 +207,3 @@
     </div>
   </div>
 </template>
-
-<script>
-import queryString from "query-string";
-import moment from "moment/min/moment-with-locales";
-import TimelineItem from "./TimelineItem.vue";
-
-moment.locale("ru");
-
-const getTimelineURL = "https://api.tomorrow.io/v4/timelines";
-const location = [43.120649, 77.096193];
-const fieldsList = {
-  temperature: 'The "real" temperature measurement (at 2m)',
-  temperatureApparent:
-    "The temperature equivalent perceived by humans, caused by the combined effects of air temperature, relative humidity, and wind speed (at 2m)",
-  dewPoint:
-    "The temperature to which air must be cooled to become saturated with water vapor (at 2m)",
-  humidity: "The concentration of water vapor present in the air",
-  windSpeed:
-    "The fundamental atmospheric quantity caused by air moving from high to low pressure, usually due to changes in temperature (at 10m)",
-  windDirection:
-    "The direction from which it originates, measured in degrees clockwise from due north (at 10m)",
-  windGust:
-    "The maximum brief increase in the speed of the wind, usually less than 20 seconds (at 10m)",
-  pressureSurfaceLevel:
-    "The force exerted against a surface by the weight of the air above the surface (at the surface level)",
-  pressureSeaLevel:
-    "The force exerted against a surface by the weight of the air above the surface (at the mean sea level)",
-  precipitationIntensity:
-    "The instantaneous precipitation rate at ground level",
-  rainIntensity: "",
-  freezingRainIntensity: "",
-  snowIntensity: "",
-  sleetIntensity: "",
-  precipitationProbability: "",
-  precipitationType: "",
-  rainAccumulation: "",
-  snowAccumulation: "",
-  snowAccumulationLwe: "",
-  snowDepth: "",
-  sleetAccumulation: "",
-  sleetAccumulationLwe: "",
-  iceAccumulation: "",
-  iceAccumulationLwe: "",
-  sunriseTime: "",
-  sunsetTime: "",
-  visibility: "",
-  cloudCover: "",
-  cloudBase: "",
-  cloudCeiling: "",
-  moonPhase: "",
-  uvIndex: "",
-  uvHealthConcern: "",
-  evapotranspiration: "",
-  weatherCodeFullDay: "",
-  weatherCodeDay: "",
-  weatherCodeNight: "",
-  weatherCode: "",
-};
-const fields = Object.keys(fieldsList);
-const units = "metric";
-const timesteps = ["current", "1h", "1d"];
-const now = moment.utc();
-const startTime = moment.utc(now).add(0, "minutes").toISOString();
-const endTime = moment.utc(now).add(1, "days").toISOString();
-const timezone = "Asia/Almaty";
-const getTimelineParameters = queryString.stringify(
-  {
-    apikey: import.meta.env.VITE_TOMORROW_API_KEY,
-    location,
-    fields,
-    units,
-    timesteps,
-    startTime,
-    endTime,
-    timezone,
-  },
-  { arrayFormat: "comma" },
-);
-
-export default {
-  data() {
-    return {
-      apiData: {},
-      moment,
-      weatherData: {
-        current: null,
-        daily: null,
-        hourly: null,
-      },
-    };
-  },
-  created() {
-    this.fetchWeatherData();
-  },
-  methods: {
-    reload() {
-      localStorage.removeItem("tomorrowioData");
-      document.cookie = "addToHomescreenCalled=; Max-Age=-99999999;";
-      window.location.reload();
-    },
-    async fetchWeatherData() {
-      const cachedData = localStorage.getItem("tomorrowioData");
-      let weatherData = null;
-
-      if (cachedData) {
-        const { data, timestamp } = JSON.parse(cachedData);
-        const currentTime = new Date().getTime();
-        const sixHoursInMilliseconds = 6 * 60 * 60 * 1000;
-
-        if (currentTime - timestamp < sixHoursInMilliseconds) {
-          weatherData = data;
-        } else {
-          localStorage.removeItem("tomorrowioData");
-        }
-      }
-
-      if (!weatherData) {
-        weatherData = await this.$http.get(
-          `${getTimelineURL}?${getTimelineParameters}`,
-        );
-        const currentTime = new Date().getTime();
-        localStorage.setItem(
-          "tomorrowioData",
-          JSON.stringify({ data: weatherData, timestamp: currentTime }),
-        );
-      }
-
-      const { timelines } = weatherData.data;
-      const {
-        intervals: [firstInterval],
-      } = timelines.find((element) => element.timestep === "current");
-      this.weatherData.current = firstInterval;
-      this.weatherData.daily = timelines.find(
-        (element) => element.timestep === "1d",
-      ).intervals;
-      this.weatherData.hourly = timelines.find(
-        (element) => element.timestep === "1h",
-      ).intervals;
-    },
-  },
-  computed: {
-    currentTemp() {
-      if (!this.weatherData.current) {
-        return "-";
-      }
-      return Math.floor(this.weatherData.current?.values.temperature);
-    },
-  },
-  components: {
-    TimelineItem,
-  },
-};
-</script>
