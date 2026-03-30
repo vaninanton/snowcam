@@ -40,7 +40,7 @@ jobs:
       - name: Build
         run: VITE_BUILD_VERSION=${{ github.sha }} VITE_TOMORROW_API_KEY=${{ secrets.VITE_TOMORROW_API_KEY }} npm run build
       - name: Setup Pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v4
         with:
