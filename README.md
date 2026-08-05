@@ -10,7 +10,7 @@
 
 ## Стек
 
-- Vue 3, Vite 7
+- Vue 3, Vite 8 (rolldown)
 - Tailwind CSS 4
 - HLS.js — воспроизведение HLS-потоков
 - Tomorrow.io API — погода
@@ -64,6 +64,8 @@ npm run preview
 | `npm run preview` | Локальный просмотр сборки       |
 | `npm run eslint`  | Проверка и автоисправление кода |
 | `npm run format`  | Форматирование через Prettier   |
+
+Перед коммитом `eslint --fix` и `prettier --write` автоматически прогоняются по изменённым `*.{js,vue}` (husky + lint-staged). Автоматических тестов в проекте нет.
 
 ## Деплой
 

@@ -22,7 +22,9 @@ const activePlace = ref(savedPlace());
 watch(activePlace, (val) => {
   try {
     localStorage.setItem(STORAGE_KEY_PLACE, val);
-  } catch (_) {}
+  } catch {
+    // localStorage может быть недоступен (приватный режим, отключённые куки)
+  }
 });
 
 const videosByPlace = computed(() =>
