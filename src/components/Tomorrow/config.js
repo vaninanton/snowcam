@@ -1,7 +1,4 @@
-import queryString from "query-string";
-import moment from "moment/min/moment-with-locales";
-
-moment.locale("ru");
+import dayjs from "./dayjs";
 
 export const TOMORROW_TIMELINE_URL = "https://api.tomorrow.io/v4/timelines";
 export const TOMORROW_LOCATION = [43.120649, 77.096193];
@@ -78,18 +75,18 @@ const FIELDS_LIST = {
 };
 
 export function buildTimelineQueryString() {
-  const now = moment.utc();
-  return queryString.stringify(
-    {
-      apikey: import.meta.env.VITE_TOMORROW_API_KEY,
-      location: TOMORROW_LOCATION,
-      fields: Object.keys(FIELDS_LIST),
-      units: "metric",
-      timesteps: ["current", "1h", "1d"],
-      startTime: moment.utc(now).add(0, "minutes").toISOString(),
-      endTime: moment.utc(now).add(1, "days").toISOString(),
-      timezone: TOMORROW_TIMEZONE,
-    },
-    { arrayFormat: "comma" },
-  );
+  const now = dayjs();
+  // Списочные параметры API ждёт через запятую — URLSearchParams массивы
+  // сам так не сериализует, поэтому склеиваем их вручную
+  return new URLSearchParams({
+    apikey: import.meta.env.VITE_TOMORROW_API_KEY,
+    location: TOMORROW_LOCATION.join(","),
+    fields: Object.keys(FIELDS_LIST).join(","),
+    units: "metric",
+    timesteps: ["current", "1h", "1d"].join(","),
+    // toISOString() всегда отдаёт UTC, отдельный перевод во UTC не нужен
+    startTime: now.toISOString(),
+    endTime: now.add(1, "day").toISOString(),
+    timezone: TOMORROW_TIMEZONE,
+  }).toString();
 }

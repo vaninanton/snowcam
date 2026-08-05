@@ -67,7 +67,8 @@ Pre-commit (husky + lint-staged) прогоняет по изменённым `*
 
 `src/components/Tomorrow/`:
 
-- [config.js](src/components/Tomorrow/config.js) — координаты, таймзона `Asia/Almaty`, полный список запрашиваемых полей и `buildTimelineQueryString()` (query-string + moment, окно «сейчас … +1 день», timesteps `current`/`1h`/`1d`). Даты везде на `moment` (`moment/min/moment-with-locales`, локаль `ru`) — это основной вклад в 486 kB чанка `vendor`.
+- [config.js](src/components/Tomorrow/config.js) — координаты, таймзона `Asia/Almaty`, полный список запрашиваемых полей и `buildTimelineQueryString()` (нативный `URLSearchParams`, окно «сейчас … +1 день», timesteps `current`/`1h`/`1d`). Списочные параметры (`location`, `fields`, `timesteps`) API ждёт через запятую, поэтому массивы склеиваются через `join(",")` вручную.
+- [dayjs.js](src/components/Tomorrow/dayjs.js) — **единственное место, где регистрируются плагины dayjs** (`isSameOrAfter`, `isSameOrBefore`). Импортировать дату нужно отсюда (`import dayjs from "./dayjs"`), а не напрямую из `"dayjs"`: библиотека — синглтон, и прямой импорт не увидит расширенных методов. Плагины подключаются с расширением `.js` в пути, иначе модуль не резолвится вне бандлера.
 - [TomorrowWidget.vue](src/components/Tomorrow/TomorrowWidget.vue) — единственное место запроса к API. Ответ кэшируется в `localStorage` под ключом `tomorrowioData` **на 6 часов** (у API ограниченный бесплатный лимит — не убирать кэш и не добавлять повторных запросов без необходимости). Клик по `VersionString` в `Index.vue` чистит этот кэш и перезагружает страницу.
 - [GetIcon.js](src/components/Tomorrow/GetIcon.js) — маппинг `weatherCode` Tomorrow.io на SVG из `@bybas/weather-icons`, отдельно день/ночь.
 
