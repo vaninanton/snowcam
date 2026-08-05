@@ -19,23 +19,21 @@
 
 <script setup>
 import { computed } from "vue";
-import moment from "moment/min/moment-with-locales";
+import dayjs from "./dayjs";
 import WeatherIcon from "./WeatherIcon.vue";
-
-moment.locale("ru");
 
 const props = defineProps({
   timeline: { type: Object, required: true },
 });
 
 const isCurrent = computed(() =>
-  moment(props.timeline.startTime).isSame(moment().startOf("hour")),
+  dayjs(props.timeline.startTime).isSame(dayjs().startOf("hour")),
 );
 
 const startTime = computed(() =>
   isCurrent.value
     ? "Сейчас"
-    : moment(props.timeline.startTime).format("HH") + ":00",
+    : dayjs(props.timeline.startTime).format("HH") + ":00",
 );
 
 const temperature = computed(() =>

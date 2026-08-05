@@ -2,7 +2,7 @@
   <img :src="icon" :alt="timeline.values.weatherCode" />
 </template>
 <script>
-import moment from "moment/min/moment-with-locales";
+import dayjs from "./dayjs";
 import { getDayIcon, getNightIcon } from "./GetIcon";
 
 export default {
@@ -12,10 +12,10 @@ export default {
   computed: {
     icon() {
       if (
-        moment(this.timeline.startTime).isSameOrAfter(
+        dayjs(this.timeline.startTime).isSameOrAfter(
           this.timeline.values.sunsetTime,
         ) ||
-        moment(this.timeline.startTime).isSameOrBefore(
+        dayjs(this.timeline.startTime).isSameOrBefore(
           this.timeline.values.sunriseTime,
         )
       ) {
