@@ -49,8 +49,11 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
+      # Уведомление не влияет на успешность деплоя: сайт к этому шагу уже
+      # опубликован, и падение отправки не должно красить весь workflow
       - name: Send message to telegram
-        uses: appleboy/telegram-action@v1.0.1
+        continue-on-error: true
+        uses: appleboy/telegram-action@master
         with:
           to: ${{ secrets.TELEGRAM_TO }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
