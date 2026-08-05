@@ -12,8 +12,8 @@ export default defineConfig({
     chunkSizeWarningLimit: 600,
     rolldownOptions: {
       input: {
-        app: resolve(__dirname, "index.html"),
-        appVideoWall: resolve(__dirname, "videowall.html"),
+        app: resolve(import.meta.dirname, "index.html"),
+        appVideoWall: resolve(import.meta.dirname, "videowall.html"),
       },
       output: {
         codeSplitting: {

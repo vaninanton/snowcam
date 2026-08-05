@@ -14,3 +14,21 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    open-pull-requests-limit: 15
+    versioning-strategy: increase
+    assignees:
+      - "vaninanton"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    groups:
+      npm-development:
+        dependency-type: "development"
+        update-types:
+          - "minor"
+          - "patch"
+      npm-production:
+        dependency-type: "production"
+        update-types:
+          - "minor"
+          - "patch"
