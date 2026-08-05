@@ -47,12 +47,15 @@ const details = computed(() => {
   return items;
 });
 
-function floorOrNull(value: number | undefined): number | null {
-  return value === undefined ? null : Math.floor(value);
+// API отдаёт не только undefined, но и явный null (например, snowDepth вне
+// США), а Math.round(null) === 0 — без этой проверки в виджете появляется
+// выдуманный «Снег 0 см»
+function floorOrNull(value: number | null | undefined): number | null {
+  return value == null ? null : Math.floor(value);
 }
 
-function roundOrNull(value: number | undefined): number | null {
-  return value === undefined ? null : Math.round(value);
+function roundOrNull(value: number | null | undefined): number | null {
+  return value == null ? null : Math.round(value);
 }
 
 onMounted(load);
