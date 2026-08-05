@@ -4,7 +4,17 @@ import WeatherWidget from "./WeatherWidget.vue";
 import { WEATHER_CACHE_KEY } from "@/composables/useWeather";
 import type { WeatherValues } from "@/types/tomorrow";
 
-function seedCache(values: WeatherValues): void {
+interface Fixture {
+  /** Часы в прошлом: из них считается свежий снег. */
+  past?: WeatherValues[];
+  /** Агрегаты за сегодня. */
+  today?: WeatherValues;
+}
+
+function seedCache(values: WeatherValues, fixture: Fixture = {}): void {
+  const hourAgo = (offset: number) =>
+    new Date(Date.now() - offset * 3600_000).toISOString();
+
   localStorage.setItem(
     WEATHER_CACHE_KEY,
     JSON.stringify({
@@ -14,10 +24,26 @@ function seedCache(values: WeatherValues): void {
           timelines: [
             {
               timestep: "current",
-              intervals: [{ startTime: "2026-08-05T18:00:00+05:00", values }],
+              intervals: [{ startTime: new Date().toISOString(), values }],
             },
-            { timestep: "1h", intervals: [] },
-            { timestep: "1d", intervals: [] },
+            {
+              timestep: "1h",
+              intervals: (fixture.past ?? []).map((v, i) => ({
+                startTime: hourAgo(i + 1),
+                values: v,
+              })),
+            },
+            {
+              timestep: "1d",
+              intervals: fixture.today
+                ? [
+                    {
+                      startTime: new Date().toISOString(),
+                      values: fixture.today,
+                    },
+                  ]
+                : [],
+            },
           ],
         },
       },
@@ -25,8 +51,8 @@ function seedCache(values: WeatherValues): void {
   );
 }
 
-async function render(values: WeatherValues) {
-  seedCache(values);
+async function render(values: WeatherValues, fixture: Fixture = {}) {
+  seedCache(values, fixture);
   const wrapper = mount(WeatherWidget);
   await flushPromises();
   return wrapper;
@@ -38,28 +64,57 @@ beforeEach(() => {
 });
 
 describe("WeatherWidget", () => {
-  // Регрессия: snowDepth вне США приходит как null, а Math.round(null) === 0,
-  // из-за чего в строке появлялся выдуманный «Снег 0 см»
-  it("не показывает снег, когда API прислал null", async () => {
+  // Регрессия: API присылает не только undefined, но и явный null, а
+  // Math.round(null) === 0 — так в виджете появлялся выдуманный «Снег 0 см».
+  // Само поле snowDepth больше не запрашивается (оно всегда null вне США),
+  // но nullable-поля остались: visibility, cloudBase и суточные агрегаты
+  it("не выдаёт null за ноль", async () => {
     const wrapper = await render({
       temperature: 5.4,
       windSpeed: 1.2,
-      snowDepth: null as unknown as number,
+      visibility: null,
     });
 
-    expect(wrapper.text()).not.toContain("Снег");
+    expect(wrapper.text()).not.toContain("Видимость");
+    expect(wrapper.text()).not.toContain("0 км");
   });
 
-  it("не показывает снег, когда поля вообще нет", async () => {
+  it("не показывает снег, когда его нет", async () => {
     const wrapper = await render({ temperature: 5.4, windSpeed: 1.2 });
 
     expect(wrapper.text()).not.toContain("Снег");
+    expect(wrapper.text()).not.toContain("см");
   });
 
-  it("показывает снег, когда значение реальное", async () => {
-    const wrapper = await render({ temperature: -3, snowDepth: 42 });
+  it("показывает свежий снег за сутки в сантиметрах", async () => {
+    const wrapper = await render(
+      { temperature: -3 },
+      { past: [{ snowAccumulation: 70 }, { snowAccumulation: 50 }] },
+    );
 
-    expect(wrapper.text()).toContain("Снег 42 см");
+    // 120 мм = 12 см
+    expect(wrapper.text()).toContain("Свежего 12 см за сутки");
+  });
+
+  it("предупреждает о ветре, при котором встают подъёмники", async () => {
+    const wrapper = await render(
+      { temperature: -3 },
+      { today: { windGustMax: 18, temperatureMax: -1 } },
+    );
+
+    expect(wrapper.text()).toContain("18 м/с");
+    expect(wrapper.text()).toContain("подъёмники");
+  });
+
+  it("летом не показывает ни снежный блок, ни предупреждения о склоне", async () => {
+    const wrapper = await render(
+      { temperature: 14, precipitationType: 1, rainIntensity: 2 },
+      { today: { temperatureMax: 18, temperatureMin: 6, windGustMax: 4 } },
+    );
+
+    expect(wrapper.text()).not.toContain("Свежего");
+    expect(wrapper.text()).not.toContain("Ожидается");
+    expect(wrapper.text()).not.toContain("Дождь на склоне");
   });
 
   it("округляет температуру вниз и показывает ощущаемую", async () => {

@@ -5,11 +5,26 @@ export const TOMORROW_LOCATION = [43.120649, 77.096193] as const;
 export const TOMORROW_TIMEZONE = "Asia/Almaty";
 
 /**
- * Запрашиваемые поля с расшифровкой из документации Tomorrow.io.
- * Комментарии здесь — единственное описание полей в проекте, поэтому список
- * держится целиком, даже если виджет показывает не всё.
+ * Часов назад в окне запроса. Бесплатный план дальше не пускает:
+ * на -48ч приходит 403 «startTime cannot be more than 24 hours in the past».
+ * Именно поэтому «свежий снег» считается за сутки, а не за календарное вчера.
  */
-const FIELDS = {
+export const HISTORY_HOURS = 24;
+
+/** Дней вперёд. Суточных интервалов приходит на один больше — за вчера. */
+export const FORECAST_DAYS = 5;
+
+/**
+ * Мгновенные поля: приходят во всех timestep.
+ * Расшифровки — из документации Tomorrow.io, это единственное описание
+ * полей в проекте.
+ *
+ * Сознательно не запрашиваются:
+ *   snowDepth          — geographic-limited регионом США, для Шымбулака
+ *                        всегда null (и именно это давало «Снег 0 см»)
+ *   *AccumulationLwe   — API их не возвращает вовсе
+ */
+const INSTANT_FIELDS = {
   temperature: 'The "real" temperature measurement (at 2m)',
   temperatureApparent:
     "The temperature equivalent perceived by humans, caused by the combined effects of air temperature, relative humidity, and wind speed (at 2m)",
@@ -24,76 +39,72 @@ const FIELDS = {
     "The maximum brief increase in the speed of the wind, usually less than 20 seconds (at 10m)",
   pressureSurfaceLevel:
     "The force exerted against a surface by the weight of the air above the surface (at the surface level)",
-  pressureSeaLevel:
-    "The force exerted against a surface by the weight of the air above the surface (at the mean sea level)",
-  precipitationIntensity:
-    "The instantaneous precipitation rate at ground level",
-  rainIntensity:
-    "Instantaneous rate of liquid precipitation (rain) at ground level",
-  freezingRainIntensity:
-    "Instantaneous rate of freezing rain (rain that freezes on contact with surfaces)",
-  snowIntensity: "Instantaneous rate of snowfall at ground level",
-  sleetIntensity:
-    "Instantaneous rate of sleet or ice pellets (frozen raindrops) at ground level",
   precipitationProbability:
     "Probability of precipitation occurring within the time period, percentage 0–100",
   precipitationType:
-    "Type of precipitation: none, rain, snow, ice pellets, freezing rain, or mixed",
+    "Type of precipitation: 0 none, 1 rain, 2 snow, 3 freezing rain, 4 ice pellets",
+  rainIntensity:
+    "Instantaneous rate of liquid precipitation (rain) at ground level, mm/hr",
   rainAccumulation:
-    "Accumulated liquid precipitation (rain) over the time period",
+    "Accumulated liquid precipitation (rain) over the time period, mm",
+  snowIntensity: "Instantaneous rate of snowfall at ground level, mm/hr",
   snowAccumulation:
-    "Accumulated snowfall (snow depth equivalent) over the time period",
-  snowAccumulationLwe:
-    "Snow accumulation expressed as liquid water equivalent (LWE) over the time period",
-  snowDepth: "Depth of existing snow on the ground from previous accumulation",
-  sleetAccumulation: "Accumulated sleet or ice pellets over the time period",
-  sleetAccumulationLwe:
-    "Sleet accumulation expressed as liquid water equivalent over the time period",
+    "Accumulated snowfall over the time period, MILLIMETRES (not cm)",
+  freezingRainIntensity:
+    "Instantaneous rate of freezing rain (rain that freezes on contact with surfaces), mm/hr",
+  sleetIntensity:
+    "Instantaneous rate of sleet or ice pellets (frozen raindrops) at ground level, mm/hr",
   iceAccumulation:
-    "Accumulated ice (e.g. from freezing rain) over the time period",
-  iceAccumulationLwe:
-    "Ice accumulation expressed as liquid water equivalent over the time period",
-  sunriseTime: "ISO 8601 time of sunrise for the location",
-  sunsetTime: "ISO 8601 time of sunset for the location",
+    "Accumulated ice (e.g. from freezing rain) over the time period, mm",
   visibility:
-    "Horizontal distance at which objects can be clearly identified (reduced by fog, precipitation)",
+    "Horizontal distance at which objects can be clearly identified, km (reduced by fog, precipitation)",
   cloudCover: "Fraction of sky covered by clouds (0–1)",
-  cloudBase: "Height of the lowest cloud base above ground level",
-  cloudCeiling:
-    "Height of the lowest cloud layer reported as broken or overcast",
-  moonPhase:
-    "Phase of the moon: new, waxing_crescent, first_quarter, waxing_gibbous, full, waning_gibbous, last_quarter, waning_crescent",
+  cloudBase: "Height of the lowest cloud base above ground level, km or null",
   uvIndex:
     "UV index (0–11+), measure of intensity of UV radiation at the surface",
-  uvHealthConcern:
-    "Health risk level from UV exposure: low, moderate, high, very high, extreme",
-  evapotranspiration:
-    "Rate of water loss from soil and plant surfaces to the atmosphere",
-  weatherCodeFullDay:
-    "Numeric weather condition code for the full day (sunrise to sunrise); supports mixed conditions",
-  weatherCodeDay:
-    "Numeric weather condition code for daytime (sunrise to sunset); supports mixed conditions",
-  weatherCodeNight:
-    "Numeric weather condition code for nighttime (sunset to sunrise); supports mixed conditions",
   weatherCode:
-    "Numeric weather condition code (basic conditions only, e.g. clear, cloudy, rain); see Tomorrow.io weather codes",
+    "Numeric weather condition code (basic conditions only); see Tomorrow.io weather codes",
+  sunriseTime: "ISO 8601 time of sunrise for the location",
+  sunsetTime: "ISO 8601 time of sunset for the location",
+} satisfies Record<string, string>;
+
+/**
+ * Суточные агрегаты. Осмысленны только в timestep "1d" — в остальных API
+ * их тоже возвращает, но брать оттуда нечего.
+ */
+const DAILY_FIELDS = {
+  temperatureMin: "Lowest temperature of the day",
+  temperatureMax: "Highest temperature of the day",
+  snowAccumulationSum: "Total snowfall over the day, MILLIMETRES (not cm)",
+  windGustMax: "Strongest wind gust of the day",
+  uvIndexMax: "Highest UV index of the day",
+  precipitationProbabilityMax: "Highest precipitation probability of the day",
 } satisfies Record<string, string>;
 
 export const TIMESTEPS = ["current", "1h", "1d"] as const;
 
-/** Собирает полный URL запроса на окно «сейчас … +1 день». */
+/**
+ * Собирает URL запроса на окно «сутки назад … +5 дней». Прошлое нужно для
+ * свежего снега, будущее — для прогноза; всё это один запрос, поэтому лимит
+ * не меняется.
+ */
 export function buildTimelineUrl(apiKey: string, now = dayjs()): string {
+  const fields = [
+    ...Object.keys(INSTANT_FIELDS),
+    ...Object.keys(DAILY_FIELDS),
+  ].join(",");
+
   // Списочные параметры API ждёт через запятую — URLSearchParams массивы
   // сам так не сериализует, поэтому склеиваем их вручную
   const params = new URLSearchParams({
     apikey: apiKey,
     location: TOMORROW_LOCATION.join(","),
-    fields: Object.keys(FIELDS).join(","),
+    fields,
     units: "metric",
     timesteps: TIMESTEPS.join(","),
     // toISOString() всегда отдаёт UTC, отдельный перевод во UTC не нужен
-    startTime: now.toISOString(),
-    endTime: now.add(1, "day").toISOString(),
+    startTime: now.subtract(HISTORY_HOURS, "hour").toISOString(),
+    endTime: now.add(FORECAST_DAYS, "day").toISOString(),
     timezone: TOMORROW_TIMEZONE,
   });
 

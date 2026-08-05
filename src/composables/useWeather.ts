@@ -1,4 +1,5 @@
 import { readonly, ref, shallowRef } from "vue";
+import dayjs from "@/components/weather/dayjs";
 import { buildTimelineUrl } from "@/components/weather/tomorrow";
 import type {
   TimelineInterval,
@@ -78,16 +79,30 @@ function pickTimeline(
  * Погода с кэшем на 6 часов. У Tomorrow.io ограниченный бесплатный лимит,
  * поэтому запрос уходит только когда кэш просрочен.
  */
+/** Сколько часов прогноза показывать в полосе. Запрос охватывает 5 суток. */
+export const HOURLY_STRIP_HOURS = 24;
+
 export function useWeather() {
   const isLoading = ref(false);
   const error = shallowRef<Error | null>(null);
   const current = shallowRef<TimelineInterval | null>(null);
   const hourly = shallowRef<readonly TimelineInterval[]>([]);
+  const pastHourly = shallowRef<readonly TimelineInterval[]>([]);
   const daily = shallowRef<readonly TimelineInterval[]>([]);
 
   function apply(response: TimelinesResponse): void {
+    const now = dayjs();
+    const allHourly = pickTimeline(response, "1h");
+
     current.value = pickTimeline(response, "current")[0] ?? null;
-    hourly.value = pickTimeline(response, "1h");
+    // Окно запроса начинается сутки назад: прошлые часы нужны для свежего
+    // снега, но в полосе прогноза им делать нечего
+    pastHourly.value = allHourly.filter((interval) =>
+      dayjs(interval.startTime).isBefore(now),
+    );
+    hourly.value = allHourly
+      .filter((interval) => !dayjs(interval.startTime).isBefore(now))
+      .slice(0, HOURLY_STRIP_HOURS);
     daily.value = pickTimeline(response, "1d");
   }
 
@@ -126,6 +141,7 @@ export function useWeather() {
     error: readonly(error),
     current: readonly(current),
     hourly: readonly(hourly),
+    pastHourly: readonly(pastHourly),
     daily: readonly(daily),
     load,
   };

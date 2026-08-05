@@ -3,11 +3,17 @@ import { computed, onMounted } from "vue";
 import TimelineItem from "./TimelineItem.vue";
 import WeatherIcon from "./WeatherIcon.vue";
 import WindCompass from "./WindCompass.vue";
+import { deriveConditions } from "./conditions";
 import { useWeather } from "@/composables/useWeather";
 
-const { isLoading, error, current, hourly, load } = useWeather();
+const { isLoading, error, current, hourly, pastHourly, daily, load } =
+  useWeather();
 
 const values = computed(() => current.value?.values ?? {});
+
+const conditions = computed(() =>
+  deriveConditions(current.value, pastHourly.value, daily.value),
+);
 
 const currentTemp = computed(() => floorOrNull(values.value.temperature));
 const feelsLike = computed(() => floorOrNull(values.value.temperatureApparent));
@@ -15,20 +21,19 @@ const windSpeed = computed(() => roundOrNull(values.value.windSpeed));
 const windDirection = computed(() => values.value.windDirection ?? null);
 const windGust = computed(() => roundOrNull(values.value.windGust));
 const humidity = computed(() => roundOrNull(values.value.humidity));
-const snowDepthCm = computed(() => roundOrNull(values.value.snowDepth));
 const precipProbability = computed(() =>
   roundOrNull(values.value.precipitationProbability),
 );
 
 const visibilityKm = computed(() => {
   const raw = values.value.visibility;
-  if (raw === undefined) return null;
+  if (raw == null) return null;
   // При units=metric API отдаёт видимость уже в км
   const km = raw >= 1000 ? raw / 1000 : raw;
   return km >= 1 ? String(Math.round(km)) : km.toFixed(1);
 });
 
-/** Показатели строки под температурой — в порядке вывода, разделитель ставится между непустыми. */
+/** Строка под температурой. Разделитель ставится только между непустыми. */
 const details = computed(() => {
   const items: string[] = [];
   if (windSpeed.value !== null) {
@@ -40,10 +45,45 @@ const details = computed(() => {
   }
   if (visibilityKm.value !== null)
     items.push(`Видимость ${visibilityKm.value} км`);
-  if (snowDepthCm.value !== null) items.push(`Снег ${snowDepthCm.value} см`);
   if (humidity.value !== null) items.push(`Влажность ${humidity.value}%`);
   if (precipProbability.value !== null && precipProbability.value > 0)
     items.push(`Осадки ${precipProbability.value}%`);
+  const { tempMin, tempMax } = conditions.value;
+  if (tempMin !== null && tempMax !== null)
+    items.push(`Ночью ${Math.round(tempMin)}° / днём ${Math.round(tempMax)}°`);
+  const uv = conditions.value.uvIndexMax;
+  // На 3200 м со снегом УФ жжёт заметно сильнее, но при слабом смысла нет
+  if (uv !== null && uv >= 3) items.push(`УФ до ${Math.round(uv)}`);
+  return items;
+});
+
+/** Снежная сводка. Пустая — блок не рендерится вовсе. */
+const snowNotes = computed(() => {
+  const { freshSnowCm, expectedSnowCm, isSnowingNow } = conditions.value;
+  const notes: string[] = [];
+  if (isSnowingNow) notes.push("Идёт снег");
+  if (freshSnowCm !== null) notes.push(`Свежего ${freshSnowCm} см за сутки`);
+  if (expectedSnowCm !== null) notes.push(`Ожидается ${expectedSnowCm} см`);
+  return notes;
+});
+
+/** Предупреждения о том, что кататься будет плохо. */
+const warnings = computed(() => {
+  const {
+    isWindAlert,
+    windGustMaxMs,
+    isLowVisibility,
+    isRainOnSnow,
+    isFreezeThaw,
+  } = conditions.value;
+  const items: string[] = [];
+  if (isWindAlert && windGustMaxMs !== null)
+    items.push(
+      `Порывы до ${Math.round(windGustMaxMs)} м/с — подъёмники могут стоять`,
+    );
+  if (isLowVisibility) items.push("Плохая видимость");
+  if (isRainOnSnow) items.push("Дождь на склоне");
+  if (isFreezeThaw) items.push("Ночью подмерзает — утром жёстко");
   return items;
 });
 
@@ -94,18 +134,51 @@ onMounted(load);
         <div
           class="text-slate-400 text-xs min-w-0 flex-1 flex flex-wrap items-baseline gap-x-1 gap-y-0.5"
         >
-          <template v-for="(item, index) in details" :key="item">
+          <!-- Разделитель внутри элемента, иначе при переносе строки он
+               остаётся висеть в её конце -->
+          <span
+            v-for="(item, index) in details"
+            :key="item"
+            class="whitespace-nowrap inline-flex items-center gap-1"
+          >
             <span v-if="index > 0" class="text-slate-600">·</span>
-            <span class="whitespace-nowrap inline-flex items-center gap-1">
-              <WindCompass
-                v-if="index === 0 && windDirection !== null"
-                :wind-direction="windDirection"
-                class="text-sm align-middle mr-0.5 shrink-0"
-              />
-              {{ item }}
-            </span>
-          </template>
+            <WindCompass
+              v-if="index === 0 && windDirection !== null"
+              :wind-direction="windDirection"
+              class="text-sm align-middle mr-0.5 shrink-0"
+            />
+            {{ item }}
+          </span>
         </div>
+      </div>
+
+      <div
+        v-if="snowNotes.length"
+        class="px-1 mb-2 sm:px-0 sm:max-w-2xl sm:mx-auto flex flex-wrap items-baseline gap-x-1 text-sm text-sky-300"
+      >
+        <span aria-hidden="true">❄</span>
+        <span
+          v-for="(note, index) in snowNotes"
+          :key="note"
+          class="whitespace-nowrap"
+        >
+          <span v-if="index > 0" class="text-slate-600">·&nbsp;</span>
+          {{ note }}
+        </span>
+      </div>
+
+      <div
+        v-if="warnings.length"
+        class="px-1 mb-2 sm:px-0 sm:max-w-2xl sm:mx-auto flex flex-wrap items-baseline gap-x-1 text-xs text-amber-400/90"
+      >
+        <span
+          v-for="(item, index) in warnings"
+          :key="item"
+          class="whitespace-nowrap"
+        >
+          <span v-if="index > 0" class="text-slate-600">·&nbsp;</span>
+          {{ item }}
+        </span>
       </div>
 
       <div

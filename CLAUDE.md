@@ -75,11 +75,26 @@ Pre-commit (husky + lint-staged) прогоняет по изменённым `*
 
 - [src/composables/useWeather.ts](src/composables/useWeather.ts) — **единственное место запроса к API**, нативный `fetch`. Ответ кэшируется в `localStorage` под ключом `tomorrowioData` **на 6 часов** (у API ограниченный бесплатный лимит — не убирать кэш и не добавлять повторных запросов). Ключ сохранён с доTS-версии, чтобы не осиротить кэш у пользователей. Клик по `VersionString` на главной вызывает `clearCache()` и перезагружает страницу.
 - [src/components/weather/tomorrow.ts](src/components/weather/tomorrow.ts) — координаты, таймзона `Asia/Almaty`, список полей с расшифровками и `buildTimelineUrl()`. Списочные параметры (`location`, `fields`, `timesteps`) API ждёт через запятую, поэтому массивы склеиваются через `join(",")` вручную.
+- [src/components/weather/conditions.ts](src/components/weather/conditions.ts) — вывод показателей для катания из сырых интервалов. Чистая функция без Vue, вся логика тестируется отдельно от компонентов.
 - [src/components/weather/dayjs.ts](src/components/weather/dayjs.ts) — **единственное место регистрации плагинов dayjs** (`isSameOrAfter`, `isSameOrBefore`). Импортировать дату нужно отсюда, а не напрямую из `"dayjs"`: библиотека — синглтон, и прямой импорт не увидит расширенных методов. Плагины подключаются с расширением `.js` в пути, иначе модуль не резолвится вне бандлера.
 - [src/components/weather/icons.ts](src/components/weather/icons.ts) — маппинг `weatherCode` на SVG из `@bybas/weather-icons`, отдельно день/ночь. Таблицы объявлены на уровне модуля.
 - Типы ответа — [src/types/tomorrow.ts](src/types/tomorrow.ts). Все поля `values` опциональны: набор зависит от timestep.
 
 Ключ API попадает в бандл как `VITE_TOMORROW_API_KEY` — это публичный клиентский ключ по устройству приложения.
+
+#### Ограничения Tomorrow.io, проверенные на этом ключе
+
+Всё ниже выяснено запросами к живому API, а не вычитано из документации:
+
+- **`snowDepth` запрашивать бессмысленно.** Поле geographic-limited регионом США и для Шымбулака всегда `null`. Именно оно давало в виджете выдуманный «Снег 0 см»: API присылает `null`, а `Math.round(null) === 0`. Помощники в виджете проверяют `== null`, а не `=== undefined` — не «чинить» это обратно.
+- **`*AccumulationLwe` API не возвращает вовсе**, даже когда их запрашиваешь.
+- **История — максимум 24 часа назад.** На `-48ч` приходит `403: startTime cannot be more than 24 hours in the past`. Поэтому свежий снег считается «за сутки», а не за календарное вчера.
+- **`snowAccumulation` и `snowAccumulationSum` — в миллиметрах**, хотя катающиеся меряют сантиметрами. Деление на 10 живёт в `conditions.ts`, в самих полях единицы указаны в расшифровках.
+- **Суточные агрегаты** (`snowAccumulationSum`, `temperatureMin/Max`, `windGustMax`, `uvIndexMax`) приходят во всех timestep, но осмысленны только в `1d`.
+- Полей `freezingLevelHeight`, `snowLevel`, `surfaceTemperature` не существует — `400 unknown field`. Снеговую линию посчитать нечем.
+- **Лимит запросов жёсткий**: `429` ловится после примерно восьми запросов подряд. Кэш на 6 часов — не оптимизация, а необходимость.
+
+Зима определяется **по данным, а не по календарю** (`isWinter` в `conditions.ts`): в горах снег бывает и в августе. Нулевые величины схлопываются в `null` и не рендерятся — виджет не должен показывать «0 см».
 
 ### PWA
 

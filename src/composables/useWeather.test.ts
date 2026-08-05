@@ -5,29 +5,35 @@ import {
   useWeather,
   WEATHER_CACHE_KEY,
   WEATHER_CACHE_TTL_MS,
+  HOURLY_STRIP_HOURS,
 } from "./useWeather";
 import type { TimelinesResponse } from "@/types/tomorrow";
 
 function makeResponse(temperature = 5): TimelinesResponse {
+  // Времена задаются относительно «сейчас»: окно запроса охватывает и прошлое,
+  // и будущее, а useWeather раскладывает часы по обе стороны от текущего момента
+  const hour = (offset: number) =>
+    new Date(Date.now() + offset * 3600_000).toISOString();
+
   return {
     data: {
       timelines: [
         {
           timestep: "current",
-          intervals: [
-            { startTime: "2026-08-05T18:00:00+05:00", values: { temperature } },
-          ],
+          intervals: [{ startTime: hour(0), values: { temperature } }],
         },
         {
           timestep: "1h",
           intervals: [
-            { startTime: "2026-08-05T18:00:00+05:00", values: {} },
-            { startTime: "2026-08-05T19:00:00+05:00", values: {} },
+            { startTime: hour(-2), values: { snowAccumulation: 10 } },
+            { startTime: hour(-1), values: { snowAccumulation: 20 } },
+            { startTime: hour(1), values: {} },
+            { startTime: hour(2), values: {} },
           ],
         },
         {
           timestep: "1d",
-          intervals: [{ startTime: "2026-08-05T00:00:00+05:00", values: {} }],
+          intervals: [{ startTime: hour(-6), values: {} }],
         },
       ],
     },
@@ -107,15 +113,47 @@ describe("загрузка", () => {
       Response.json(makeResponse()),
     );
 
-    const { current, hourly, daily, isLoading, error, load } = useWeather();
+    const { current, daily, isLoading, error, load } = useWeather();
     await load();
 
     expect(current.value?.values.temperature).toBe(5);
-    expect(hourly.value).toHaveLength(2);
     expect(daily.value).toHaveLength(1);
     expect(isLoading.value).toBe(false);
     expect(error.value).toBeNull();
     expect(localStorage.getItem(WEATHER_CACHE_KEY)).not.toBeNull();
+  });
+
+  it("разделяет часы на прошедшие и будущие", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      Response.json(makeResponse()),
+    );
+
+    const { hourly, pastHourly, load } = useWeather();
+    await load();
+
+    // Прошлое нужно для свежего снега, но в полосе прогноза ему не место
+    expect(pastHourly.value).toHaveLength(2);
+    expect(hourly.value).toHaveLength(2);
+    expect(
+      pastHourly.value.every((i) => new Date(i.startTime) < new Date()),
+    ).toBe(true);
+    expect(hourly.value.every((i) => new Date(i.startTime) >= new Date())).toBe(
+      true,
+    );
+  });
+
+  it("обрезает полосу прогноза, чтобы она не растянулась на пять суток", async () => {
+    const many = makeResponse();
+    many.data.timelines[1]!.intervals = Array.from({ length: 120 }, (_, i) => ({
+      startTime: new Date(Date.now() + (i + 1) * 3600_000).toISOString(),
+      values: {},
+    }));
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(Response.json(many));
+
+    const { hourly, load } = useWeather();
+    await load();
+
+    expect(hourly.value).toHaveLength(HOURLY_STRIP_HOURS);
   });
 
   it("не роняет приложение на ошибке HTTP и не кэширует её", async () => {
