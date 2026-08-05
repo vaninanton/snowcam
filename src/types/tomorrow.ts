@@ -8,6 +8,13 @@
 export interface WeatherValues {
   temperature?: number;
   temperatureApparent?: number;
+  /** Суточные агрегаты — приходят только в timestep "1d". */
+  temperatureMin?: number | null;
+  temperatureMax?: number | null;
+  snowAccumulationSum?: number | null;
+  windGustMax?: number | null;
+  uvIndexMax?: number | null;
+  precipitationProbabilityMax?: number | null;
   dewPoint?: number;
   humidity?: number;
   windSpeed?: number;
@@ -16,16 +23,21 @@ export interface WeatherValues {
   pressureSurfaceLevel?: number;
   pressureSeaLevel?: number;
   precipitationProbability?: number;
+  /** См. PRECIPITATION_TYPE в conditions.ts. */
   precipitationType?: number;
   rainAccumulation?: number;
+  rainIntensity?: number;
+  /** Миллиметры, не сантиметры. */
   snowAccumulation?: number;
-  snowDepth?: number;
+  /** мм/ч. */
+  snowIntensity?: number;
   sleetAccumulation?: number;
   iceAccumulation?: number;
-  visibility?: number;
+  /** Километры. Может быть null. */
+  visibility?: number | null;
   cloudCover?: number;
-  cloudBase?: number;
-  cloudCeiling?: number;
+  cloudBase?: number | null;
+  cloudCeiling?: number | null;
   moonPhase?: number;
   uvIndex?: number;
   uvHealthConcern?: number;
