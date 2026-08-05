@@ -1,5 +1,17 @@
 <template>
-  <video :src="src" :poster="poster" ref="videoItem"></video>
+  <!--
+    Размеры задаются здесь, а не в местах использования. Без w-full ширину
+    <video> определяет разрешение постера (720px постер -> видео 720px в
+    ячейке 835px), а без aspect-video высота до загрузки потока берётся из
+    постера и меняется на размеры видео — отсюда прыжки. С этой парой
+    вёрстка не зависит ни от разрешения постера, ни от момента загрузки.
+  -->
+  <video
+    class="aspect-video w-full object-cover"
+    :src="src"
+    :poster="poster"
+    ref="videoItem"
+  ></video>
 </template>
 
 <script setup>

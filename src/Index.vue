@@ -85,7 +85,6 @@ function clearCacheAndReload() {
         <HlsVideo
           :src="video.src"
           :poster="video.poster"
-          class="aspect-video"
           muted
           controls
           allowfullscreen
