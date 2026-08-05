@@ -1,4 +1,6 @@
-export default [
+import type { Camera } from "@/types/camera";
+
+export const cameras: readonly Camera[] = [
   {
     place: "Шымбулак",
     title: "Ледник Богдановича",
@@ -31,4 +33,9 @@ export default [
     src: "https://ipcam.kz/cam2/index.m3u8",
     poster: "/previews/d5361ff25a96271df9ac614d9138806a.jpg",
   },
+];
+
+/** Локации в порядке появления в списке камер. */
+export const places: readonly string[] = [
+  ...new Set(cameras.map((camera) => camera.place)),
 ];

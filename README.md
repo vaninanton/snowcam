@@ -10,10 +10,12 @@
 
 ## Стек
 
-- Vue 3, Vite 8 (rolldown)
+- Vue 3 (Composition API, `<script setup lang="ts">`), TypeScript
+- Vite 8 (rolldown)
 - Tailwind CSS 4
 - HLS.js — воспроизведение HLS-потоков
 - Tomorrow.io API — погода
+- Vitest + @vue/test-utils — тесты
 
 ## Требования
 
@@ -57,15 +59,18 @@ npm run preview
 
 ## Скрипты
 
-| Команда           | Описание                        |
-| ----------------- | ------------------------------- |
-| `npm run dev`     | Запуск dev-сервера с HTTPS      |
-| `npm run build`   | Сборка в `dist/`                |
-| `npm run preview` | Локальный просмотр сборки       |
-| `npm run eslint`  | Проверка и автоисправление кода |
-| `npm run format`  | Форматирование через Prettier   |
+| Команда              | Описание                        |
+| -------------------- | ------------------------------- |
+| `npm run dev`        | Запуск dev-сервера с HTTPS      |
+| `npm run build`      | Сборка в `dist/`                |
+| `npm run preview`    | Локальный просмотр сборки       |
+| `npm run typecheck`  | Проверка типов через `vue-tsc`  |
+| `npm test`           | Тесты (Vitest)                  |
+| `npm run test:watch` | Тесты в watch-режиме            |
+| `npm run eslint`     | Проверка и автоисправление кода |
+| `npm run format`     | Форматирование через Prettier   |
 
-Перед коммитом `eslint --fix` и `prettier --write` автоматически прогоняются по изменённым `*.{js,vue}` (husky + lint-staged). Автоматических тестов в проекте нет.
+Перед коммитом прогоняются тесты, а по изменённым `*.{ts,vue}` — `eslint --fix` и `prettier --write` (husky + lint-staged). На каждый pull request GitHub Actions проверяет типы, линт, форматирование и тесты.
 
 ## Деплой
 

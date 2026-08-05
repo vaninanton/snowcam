@@ -1,10 +1,10 @@
 import AddToHomescreen from "@owliehq/vue-addtohomescreen";
-import createSnowCamApp from "./app";
-import App from "./Index.vue";
-import SplashscreenImage from "./splashscreen.png";
+import { createSnowCamApp } from "./createApp";
+import HomePage from "./pages/HomePage.vue";
+import splashImage from "./splashscreen.png";
 
-createSnowCamApp(App, {
-  splashImage: SplashscreenImage,
+createSnowCamApp(HomePage, {
+  splashImage,
   beforeMount(app) {
     app.use(AddToHomescreen, {
       title: "SnowCam",
