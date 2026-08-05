@@ -1,48 +1,34 @@
+<script setup lang="ts">
+import { ref, toRef } from "vue";
+import { useHlsPlayer } from "@/composables/useHlsPlayer";
+
+// Размеры задаются здесь, а не в местах использования. Без w-full ширину
+// <video> определяет разрешение постера (720px постер -> видео 720px в ячейке
+// 835px), а без aspect-video высота до загрузки потока берётся из постера и
+// меняется на размеры видео — отсюда прыжки страницы. С этой парой вёрстка не
+// зависит ни от разрешения постера, ни от момента загрузки.
+//
+// Комментариев внутри <template> нет намеренно: узел-комментарий рядом с
+// корневым элементом делает шаблон фрагментом, и атрибуты от родителя
+// (muted, controls, autoplay) перестают наследоваться.
+const props = withDefaults(
+  defineProps<{
+    src: string;
+    poster?: string;
+  }>(),
+  { poster: "" },
+);
+
+const videoRef = ref<HTMLVideoElement | null>(null);
+
+useHlsPlayer(videoRef, toRef(props, "src"));
+</script>
+
 <template>
-  <!--
-    Размеры задаются здесь, а не в местах использования. Без w-full ширину
-    <video> определяет разрешение постера (720px постер -> видео 720px в
-    ячейке 835px), а без aspect-video высота до загрузки потока берётся из
-    постера и меняется на размеры видео — отсюда прыжки. С этой парой
-    вёрстка не зависит ни от разрешения постера, ни от момента загрузки.
-  -->
   <video
+    ref="videoRef"
     class="aspect-video w-full object-cover"
     :src="src"
     :poster="poster"
-    ref="videoItem"
   ></video>
 </template>
-
-<script setup>
-import { ref, onMounted } from "vue";
-import Hls from "hls.js";
-
-const props = defineProps({
-  src: String,
-  poster: { type: String, default: "" },
-});
-
-const videoItem = ref(null);
-
-const manifestParsed = () => {
-  const video = videoItem.value;
-  if (video.autoplay) {
-    video.play();
-  }
-};
-
-onMounted(() => {
-  const video = videoItem.value;
-
-  if (Hls.isSupported()) {
-    const hls = new Hls();
-    hls.on(Hls.Events.MANIFEST_PARSED, manifestParsed);
-    hls.loadSource(props.src);
-    hls.attachMedia(video);
-  } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-    video.src = props.src;
-    video.addEventListener("loadedmetadata", manifestParsed);
-  }
-});
-</script>

@@ -1,10 +1,15 @@
 import dayjs from "./dayjs";
 
 export const TOMORROW_TIMELINE_URL = "https://api.tomorrow.io/v4/timelines";
-export const TOMORROW_LOCATION = [43.120649, 77.096193];
+export const TOMORROW_LOCATION = [43.120649, 77.096193] as const;
 export const TOMORROW_TIMEZONE = "Asia/Almaty";
 
-const FIELDS_LIST = {
+/**
+ * Запрашиваемые поля с расшифровкой из документации Tomorrow.io.
+ * Комментарии здесь — единственное описание полей в проекте, поэтому список
+ * держится целиком, даже если виджет показывает не всё.
+ */
+const FIELDS = {
   temperature: 'The "real" temperature measurement (at 2m)',
   temperatureApparent:
     "The temperature equivalent perceived by humans, caused by the combined effects of air temperature, relative humidity, and wind speed (at 2m)",
@@ -72,21 +77,25 @@ const FIELDS_LIST = {
     "Numeric weather condition code for nighttime (sunset to sunrise); supports mixed conditions",
   weatherCode:
     "Numeric weather condition code (basic conditions only, e.g. clear, cloudy, rain); see Tomorrow.io weather codes",
-};
+} satisfies Record<string, string>;
 
-export function buildTimelineQueryString() {
-  const now = dayjs();
+export const TIMESTEPS = ["current", "1h", "1d"] as const;
+
+/** Собирает полный URL запроса на окно «сейчас … +1 день». */
+export function buildTimelineUrl(apiKey: string, now = dayjs()): string {
   // Списочные параметры API ждёт через запятую — URLSearchParams массивы
   // сам так не сериализует, поэтому склеиваем их вручную
-  return new URLSearchParams({
-    apikey: import.meta.env.VITE_TOMORROW_API_KEY,
+  const params = new URLSearchParams({
+    apikey: apiKey,
     location: TOMORROW_LOCATION.join(","),
-    fields: Object.keys(FIELDS_LIST).join(","),
+    fields: Object.keys(FIELDS).join(","),
     units: "metric",
-    timesteps: ["current", "1h", "1d"].join(","),
+    timesteps: TIMESTEPS.join(","),
     // toISOString() всегда отдаёт UTC, отдельный перевод во UTC не нужен
     startTime: now.toISOString(),
     endTime: now.add(1, "day").toISOString(),
     timezone: TOMORROW_TIMEZONE,
-  }).toString();
+  });
+
+  return `${TOMORROW_TIMELINE_URL}?${params}`;
 }
