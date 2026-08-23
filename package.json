@@ -17,8 +17,8 @@
   "dependencies": {
     "@bybas/weather-icons": "^2.0.0",
     "@owliehq/vue-addtohomescreen": "^2.0.3",
-    "dayjs": "^1.11.21",
-    "hls.js": "^1.6.17",
+    "dayjs": "^1.11.23",
+    "hls.js": "^1.7.1",
     "ios-pwa-splash": "^1.0.0",
     "vue": "^3.5.41"
   },
