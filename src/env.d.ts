@@ -16,17 +16,3 @@ declare module "ios-pwa-splash/index" {
   /** Рисует splash-экраны для iOS и вставляет apple-touch-startup-image в head. */
   export default function iosPWASplash(icon: string, color?: string): void;
 }
-
-declare module "@owliehq/vue-addtohomescreen" {
-  import type { Plugin } from "vue";
-
-  export interface AddToHomescreenOptions {
-    title?: string;
-    content?: string;
-    iconPath?: string;
-    lang?: string;
-  }
-
-  const plugin: Plugin<[AddToHomescreenOptions?]>;
-  export default plugin;
-}

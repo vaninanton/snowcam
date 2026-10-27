@@ -1,9 +1,9 @@
 import { fileURLToPath, URL } from "node:url";
 import { defineConfig } from "vitest/config";
-import vue from "@vitejs/plugin-vue";
+import react from "@vitejs/plugin-react";
 
 export default defineConfig({
-  plugins: [vue()],
+  plugins: [react()],
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
@@ -11,7 +11,7 @@ export default defineConfig({
   },
   test: {
     environment: "happy-dom",
-    include: ["src/**/*.test.ts"],
+    include: ["src/**/*.test.{ts,tsx}"],
     setupFiles: ["./src/test/setup.ts"],
     restoreMocks: true,
   },

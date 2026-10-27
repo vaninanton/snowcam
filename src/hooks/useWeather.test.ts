@@ -1,6 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { renderHook, waitFor } from "@testing-library/react";
 import {
   clearCache,
+  loadWeather,
   readCache,
   useWeather,
   WEATHER_CACHE_KEY,
@@ -57,11 +59,10 @@ describe("кэш", () => {
     );
     const fetchSpy = vi.spyOn(globalThis, "fetch");
 
-    const { current, load } = useWeather();
-    await load();
+    const { current } = await loadWeather();
 
     expect(fetchSpy).not.toHaveBeenCalled();
-    expect(current.value?.values.temperature).toBe(7);
+    expect(current?.values.temperature).toBe(7);
   });
 
   it("выбрасывает просроченный кэш и идёт в сеть", async () => {
@@ -76,11 +77,10 @@ describe("кэш", () => {
       .spyOn(globalThis, "fetch")
       .mockResolvedValue(Response.json(makeResponse(3)));
 
-    const { current, load } = useWeather();
-    await load();
+    const { current } = await loadWeather();
 
     expect(fetchSpy).toHaveBeenCalledOnce();
-    expect(current.value?.values.temperature).toBe(3);
+    expect(current?.values.temperature).toBe(3);
   });
 
   it("переживает битый JSON и чистит его", () => {
@@ -113,13 +113,10 @@ describe("загрузка", () => {
       Response.json(makeResponse()),
     );
 
-    const { current, daily, isLoading, error, load } = useWeather();
-    await load();
+    const { current, daily } = await loadWeather();
 
-    expect(current.value?.values.temperature).toBe(5);
-    expect(daily.value).toHaveLength(1);
-    expect(isLoading.value).toBe(false);
-    expect(error.value).toBeNull();
+    expect(current?.values.temperature).toBe(5);
+    expect(daily).toHaveLength(1);
     expect(localStorage.getItem(WEATHER_CACHE_KEY)).not.toBeNull();
   });
 
@@ -128,18 +125,15 @@ describe("загрузка", () => {
       Response.json(makeResponse()),
     );
 
-    const { hourly, pastHourly, load } = useWeather();
-    await load();
+    const { hourly, pastHourly } = await loadWeather();
 
     // Прошлое нужно для свежего снега, но в полосе прогноза ему не место
-    expect(pastHourly.value).toHaveLength(2);
-    expect(hourly.value).toHaveLength(2);
-    expect(
-      pastHourly.value.every((i) => new Date(i.startTime) < new Date()),
-    ).toBe(true);
-    expect(hourly.value.every((i) => new Date(i.startTime) >= new Date())).toBe(
+    expect(pastHourly).toHaveLength(2);
+    expect(hourly).toHaveLength(2);
+    expect(pastHourly.every((i) => new Date(i.startTime) < new Date())).toBe(
       true,
     );
+    expect(hourly.every((i) => new Date(i.startTime) >= new Date())).toBe(true);
   });
 
   it("обрезает полосу прогноза, чтобы она не растянулась на пять суток", async () => {
@@ -150,44 +144,82 @@ describe("загрузка", () => {
     }));
     vi.spyOn(globalThis, "fetch").mockResolvedValue(Response.json(many));
 
-    const { hourly, load } = useWeather();
-    await load();
+    const { hourly } = await loadWeather();
 
-    expect(hourly.value).toHaveLength(HOURLY_STRIP_HOURS);
+    expect(hourly).toHaveLength(HOURLY_STRIP_HOURS);
   });
 
-  it("не роняет приложение на ошибке HTTP и не кэширует её", async () => {
+  // StrictMode в dev запускает эффект дважды, а лимит API жёсткий
+  it("одновременные вызовы делят один запрос", async () => {
+    const fetchSpy = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(Response.json(makeResponse()));
+
+    await Promise.all([loadWeather(), loadWeather()]);
+
+    expect(fetchSpy).toHaveBeenCalledOnce();
+  });
+
+  it("на ошибке HTTP отклоняется и не кэширует её", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response("nope", { status: 503 }),
     );
 
-    const { error, isLoading, current, load } = useWeather();
-    await load();
-
-    expect(error.value).toBeInstanceOf(Error);
-    expect(error.value?.message).toContain("503");
-    expect(current.value).toBeNull();
-    expect(isLoading.value).toBe(false);
+    await expect(loadWeather()).rejects.toThrow("503");
     expect(localStorage.getItem(WEATHER_CACHE_KEY)).toBeNull();
   });
 
-  it("не роняет приложение при обрыве сети", async () => {
-    vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("network down"));
+  it("после ошибки следующий вызов идёт в сеть заново", async () => {
+    const fetchSpy = vi
+      .spyOn(globalThis, "fetch")
+      .mockRejectedValueOnce(new Error("network down"))
+      .mockResolvedValue(Response.json(makeResponse()));
 
-    const { error, load } = useWeather();
-    await load();
-
-    expect(error.value?.message).toBe("network down");
+    await expect(loadWeather()).rejects.toThrow("network down");
+    await expect(loadWeather()).resolves.toBeDefined();
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
   });
 
   it("сообщает об отсутствующем ключе, не делая запроса", async () => {
     vi.stubEnv("VITE_TOMORROW_API_KEY", "");
     const fetchSpy = vi.spyOn(globalThis, "fetch");
 
-    const { error, load } = useWeather();
-    await load();
-
+    await expect(loadWeather()).rejects.toThrow("VITE_TOMORROW_API_KEY");
     expect(fetchSpy).not.toHaveBeenCalled();
-    expect(error.value?.message).toContain("VITE_TOMORROW_API_KEY");
+  });
+});
+
+describe("useWeather", () => {
+  it("со свежим кэшем готов с первого рендера", () => {
+    localStorage.setItem(
+      WEATHER_CACHE_KEY,
+      JSON.stringify({ data: makeResponse(7), timestamp: Date.now() }),
+    );
+
+    const { result } = renderHook(() => useWeather());
+
+    expect(result.current.status).toBe("ready");
+  });
+
+  it("без кэша загружает погоду", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      Response.json(makeResponse(3)),
+    );
+
+    const { result } = renderHook(() => useWeather());
+
+    expect(result.current.status).toBe("loading");
+    await waitFor(() => expect(result.current.status).toBe("ready"));
+  });
+
+  it("не роняет приложение при обрыве сети", async () => {
+    vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("network down"));
+
+    const { result } = renderHook(() => useWeather());
+
+    await waitFor(() => expect(result.current.status).toBe("error"));
+    expect(
+      result.current.status === "error" && result.current.error.message,
+    ).toBe("network down");
   });
 });

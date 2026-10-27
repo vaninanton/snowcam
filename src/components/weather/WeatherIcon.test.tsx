@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { mount } from "@vue/test-utils";
-import WeatherIcon from "./WeatherIcon.vue";
+import { render } from "@testing-library/react";
+import WeatherIcon from "./WeatherIcon";
 import { getWeatherIcon, WEATHER_CODE } from "./icons";
 import type { TimelineInterval } from "@/types/tomorrow";
 
@@ -20,7 +20,8 @@ function interval(startTime: string, extra = {}): TimelineInterval {
 }
 
 function srcOf(timeline: TimelineInterval): string | undefined {
-  return mount(WeatherIcon, { props: { timeline } }).attributes("src");
+  const { container } = render(<WeatherIcon timeline={timeline} />);
+  return container.querySelector("img")?.getAttribute("src") ?? undefined;
 }
 
 describe("WeatherIcon", () => {
@@ -56,10 +57,12 @@ describe("WeatherIcon", () => {
   });
 
   it("ничего не рендерит для неизвестного кода вместо битой картинки", () => {
-    const wrapper = mount(WeatherIcon, {
-      props: { timeline: interval("2026-08-05T08:00:00Z", { weatherCode: 0 }) },
-    });
+    const { container } = render(
+      <WeatherIcon
+        timeline={interval("2026-08-05T08:00:00Z", { weatherCode: 0 })}
+      />,
+    );
 
-    expect(wrapper.find("img").exists()).toBe(false);
+    expect(container.querySelector("img")).toBeNull();
   });
 });

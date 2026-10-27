@@ -25,14 +25,16 @@ export const cameras: readonly Camera[] = [
     src: "https://ipcam.kz/cam1/index.m3u8",
     poster: "/previews/d5e9db37c506562c992e108f46896797.webp",
   },
-  {
-    place: "Шымбулак",
-    title: "Бугель",
-    description: "Базовая станция",
-    elevation: 2300,
-    src: "https://ipcam.kz/cam2/index.m3u8",
-    poster: "/previews/c08c43b9f4a973c8f980057d4f948de2.webp",
-  },
+  // Временно скрыта: поток cam2 давно отдаёт `not found`. Вернуть, когда
+  // камера оживёт — постер остался в public/previews.
+  // {
+  //   place: "Шымбулак",
+  //   title: "Бугель",
+  //   description: "Базовая станция",
+  //   elevation: 2300,
+  //   src: "https://ipcam.kz/cam2/index.m3u8",
+  //   poster: "/previews/c08c43b9f4a973c8f980057d4f948de2.webp",
+  // },
 ];
 
 /** Локации в порядке появления в списке камер. */

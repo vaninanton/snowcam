@@ -1,7 +1,7 @@
 import { fileURLToPath, URL } from "node:url";
 import { resolve } from "node:path";
 import { defineConfig } from "vite";
-import vue from "@vitejs/plugin-vue";
+import react from "@vitejs/plugin-react";
 import mkcert from "vite-plugin-mkcert";
 import tailwindcss from "@tailwindcss/vite";
 
@@ -9,7 +9,7 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineConfig({
   // HTTPS включает vite-plugin-mkcert: он выдаёт сертификат и для dev, и для
   // preview, если server.https явно не выставлен в false
-  plugins: [tailwindcss(), vue(), mkcert()],
+  plugins: [tailwindcss(), react(), mkcert()],
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),

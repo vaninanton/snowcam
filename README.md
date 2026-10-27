@@ -10,12 +10,12 @@
 
 ## Стек
 
-- Vue 3 (Composition API, `<script setup lang="ts">`), TypeScript
+- React 19, TypeScript
 - Vite 8 (rolldown)
 - Tailwind CSS 4
 - HLS.js — воспроизведение HLS-потоков
 - Tomorrow.io API — погода
-- Vitest + @vue/test-utils — тесты
+- Vitest + Testing Library — тесты
 
 ## Требования
 
@@ -64,13 +64,13 @@ npm run preview
 | `npm run dev`        | Запуск dev-сервера с HTTPS      |
 | `npm run build`      | Сборка в `dist/`                |
 | `npm run preview`    | Локальный просмотр сборки       |
-| `npm run typecheck`  | Проверка типов через `vue-tsc`  |
+| `npm run typecheck`  | Проверка типов через `tsc`      |
 | `npm test`           | Тесты (Vitest)                  |
 | `npm run test:watch` | Тесты в watch-режиме            |
 | `npm run eslint`     | Проверка и автоисправление кода |
 | `npm run format`     | Форматирование через Prettier   |
 
-Перед коммитом прогоняются тесты, а по изменённым `*.{ts,vue}` — `eslint --fix` и `prettier --write` (husky + lint-staged). На каждый pull request GitHub Actions проверяет типы, линт, форматирование и тесты.
+Перед коммитом прогоняются тесты, а по изменённым `*.{ts,tsx}` — `eslint --fix` и `prettier --write` (husky + lint-staged). На каждый pull request GitHub Actions проверяет типы, линт, форматирование и тесты.
 
 ## Деплой
 
