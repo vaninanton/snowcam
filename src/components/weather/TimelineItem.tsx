@@ -1,11 +1,8 @@
 import dayjs from "./dayjs";
 import WeatherIcon from "./WeatherIcon";
+import { floorOrNull } from "./format";
 import { cx } from "@/lib/cx";
 import type { TimelineInterval } from "@/types/tomorrow";
-
-function floorOrNull(value: number | undefined): number | null {
-  return value === undefined ? null : Math.floor(value);
-}
 
 export default function TimelineItem({
   timeline,
@@ -32,7 +29,7 @@ export default function TimelineItem({
 
         <div className="whitespace-nowrap">
           <span className="font-bold text-sm">
-            {temperature}
+            {temperature ?? "-"}
             <sup>°</sup>
           </span>
           {temperatureApparent !== null &&

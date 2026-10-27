@@ -1,14 +1,15 @@
 import { lazy, Suspense, useState } from "react";
 import { SHOWN_COOKIE } from "@/components/AddToHomescreen";
+import VersionString from "@/components/VersionString";
 import { cameras, places } from "@/data/cameras";
 import { clearCache } from "@/hooks/useWeather";
+import { cameraGridCols } from "@/lib/cameraGrid";
 import { cx } from "@/lib/cx";
 
 const STORAGE_KEY_PLACE = "snowcam-place-tab";
 
 const WeatherWidget = lazy(() => import("@/components/weather/WeatherWidget"));
 const HlsVideo = lazy(() => import("@/components/HlsVideo"));
-const VersionString = lazy(() => import("@/components/VersionString"));
 
 function readSavedPlace(): string {
   try {
@@ -39,7 +40,7 @@ export default function HomePage() {
   const [activePlace, setActivePlace] = useState(readSavedPlace);
 
   const visibleCameras = cameras.filter(
-    (camera) => camera.place === activePlace && camera.src,
+    (camera) => camera.place === activePlace,
   );
 
   function selectPlace(place: string): void {
@@ -71,7 +72,12 @@ export default function HomePage() {
           ))}
         </div>
       )}
-      <ul className="grid max-w-full mt-4 mb-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 mx-auto gap-4 xl:gap-y-6 xl:gap-x-8 xl:max-w-full sm:px-6 xl:px-8">
+      <ul
+        className={cx(
+          "grid max-w-full mt-4 mb-4 mx-auto gap-4 xl:gap-y-6 xl:gap-x-8 sm:px-6 xl:px-8",
+          cameraGridCols(visibleCameras.length),
+        )}
+      >
         {visibleCameras.map((camera) => (
           <li key={camera.title}>
             <div>
@@ -95,9 +101,7 @@ export default function HomePage() {
           </li>
         ))}
       </ul>
-      <Suspense>
-        <VersionString onClick={clearCacheAndReload} />
-      </Suspense>
+      <VersionString onClick={clearCacheAndReload} />
     </>
   );
 }

@@ -132,4 +132,20 @@ describe("WeatherWidget", () => {
     expect(text).toContain("Влажность 95%");
     expect(text).not.toContain("·");
   });
+
+  // Раньше стрелка цеплялась к первому пункту строки, каким бы он ни был
+  it("не рисует компас без пункта про ветер", () => {
+    seedCache({ temperature: 5, windDirection: 90, visibility: 10 });
+    const { container } = render(<WeatherWidget />);
+
+    expect(container.textContent).toContain("Видимость 10 км");
+    expect(container.querySelector('[title="Восточный"]')).toBeNull();
+  });
+
+  it("рисует компас рядом с ветром", () => {
+    seedCache({ temperature: 5, windSpeed: 3, windDirection: 90 });
+    const { container } = render(<WeatherWidget />);
+
+    expect(container.querySelector('[title="Восточный"]')).not.toBeNull();
+  });
 });

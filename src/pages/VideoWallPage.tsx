@@ -1,12 +1,12 @@
 import HlsVideo from "@/components/HlsVideo";
 import { cameras } from "@/data/cameras";
-
-const visibleCameras = cameras.filter((camera) => camera.src);
+import { cameraGridCols } from "@/lib/cameraGrid";
+import { cx } from "@/lib/cx";
 
 export default function VideoWallPage() {
   return (
-    <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 mx-auto">
-      {visibleCameras.map((camera) => (
+    <ul className={cx("grid mx-auto", cameraGridCols(cameras.length))}>
+      {cameras.map((camera) => (
         <li className="relative" key={camera.title}>
           <HlsVideo
             src={camera.src}

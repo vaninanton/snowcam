@@ -3,20 +3,10 @@ import TimelineItem from "./TimelineItem";
 import WeatherIcon from "./WeatherIcon";
 import WindCompass from "./WindCompass";
 import { deriveConditions, type SkiConditions } from "./conditions";
+import { floorOrNull, roundOrNull } from "./format";
 import { useWeather, type WeatherData } from "@/hooks/useWeather";
 import { cx } from "@/lib/cx";
 import type { WeatherValues } from "@/types/tomorrow";
-
-// API отдаёт не только undefined, но и явный null (например, snowDepth вне
-// США), а Math.round(null) === 0 — без этой проверки в виджете появляется
-// выдуманный «Снег 0 см»
-function floorOrNull(value: number | null | undefined): number | null {
-  return value == null ? null : Math.floor(value);
-}
-
-function roundOrNull(value: number | null | undefined): number | null {
-  return value == null ? null : Math.round(value);
-}
 
 function visibilityKm(values: WeatherValues): string | null {
   const raw = values.visibility;
@@ -26,33 +16,44 @@ function visibilityKm(values: WeatherValues): string | null {
   return km >= 1 ? String(Math.round(km)) : km.toFixed(1);
 }
 
+interface Detail {
+  text: string;
+  /** Только у пункта про ветер: рядом с ним рисуется стрелка. */
+  windDirection?: number;
+}
+
 /** Строка под температурой. Разделитель ставится только между непустыми. */
 function describeDetails(
   values: WeatherValues,
   conditions: SkiConditions,
-): string[] {
+): Detail[] {
   const windSpeed = roundOrNull(values.windSpeed);
   const windGust = roundOrNull(values.windGust);
   const humidity = roundOrNull(values.humidity);
   const precipProbability = roundOrNull(values.precipitationProbability);
   const visibility = visibilityKm(values);
 
-  const items: string[] = [];
+  const items: Detail[] = [];
   if (windSpeed !== null) {
     const gust =
       windGust !== null && windGust > windSpeed ? ` (до ${windGust})` : "";
-    items.push(`Ветер ${windSpeed} м/с${gust}`);
+    items.push({
+      text: `Ветер ${windSpeed} м/с${gust}`,
+      windDirection: values.windDirection ?? undefined,
+    });
   }
-  if (visibility !== null) items.push(`Видимость ${visibility} км`);
-  if (humidity !== null) items.push(`Влажность ${humidity}%`);
+  if (visibility !== null) items.push({ text: `Видимость ${visibility} км` });
+  if (humidity !== null) items.push({ text: `Влажность ${humidity}%` });
   if (precipProbability !== null && precipProbability > 0)
-    items.push(`Осадки ${precipProbability}%`);
+    items.push({ text: `Осадки ${precipProbability}%` });
   const { tempMin, tempMax } = conditions;
   if (tempMin !== null && tempMax !== null)
-    items.push(`Ночью ${Math.round(tempMin)}° / днём ${Math.round(tempMax)}°`);
+    items.push({
+      text: `Ночью ${Math.round(tempMin)}° / днём ${Math.round(tempMax)}°`,
+    });
   const uv = conditions.uvIndexMax;
   // На 3200 м со снегом УФ жжёт заметно сильнее, но при слабом смысла нет
-  if (uv !== null && uv >= 3) items.push(`УФ до ${Math.round(uv)}`);
+  if (uv !== null && uv >= 3) items.push({ text: `УФ до ${Math.round(uv)}` });
   return items;
 }
 
@@ -124,7 +125,6 @@ function Forecast({ data }: { data: WeatherData }) {
 
   const currentTemp = floorOrNull(values.temperature);
   const feelsLike = floorOrNull(values.temperatureApparent);
-  const windDirection = values.windDirection ?? null;
   const details = describeDetails(values, conditions);
   const snowNotes = describeSnow(conditions);
   const warnings = describeWarnings(conditions);
@@ -152,19 +152,19 @@ function Forecast({ data }: { data: WeatherData }) {
           </div>
         </div>
         <div className="text-slate-400 text-xs min-w-0 flex-1 flex flex-wrap items-baseline gap-x-1 gap-y-0.5">
-          {details.map((item, index) => (
+          {details.map(({ text, windDirection }, index) => (
             <span
-              key={item}
+              key={text}
               className="whitespace-nowrap inline-flex items-center gap-1"
             >
               {index > 0 && <span className="text-slate-600">·</span>}
-              {index === 0 && windDirection !== null && (
+              {windDirection !== undefined && (
                 <WindCompass
                   windDirection={windDirection}
                   className="text-sm align-middle mr-0.5 shrink-0"
                 />
               )}
-              {item}
+              {text}
             </span>
           ))}
         </div>

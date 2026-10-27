@@ -9,19 +9,14 @@ import { cx } from "@/lib/cx";
 // прыжки страницы. С этой парой вёрстка не зависит ни от разрешения постера,
 // ни от момента загрузки, а оверлей ошибки ложится ровно на кадр.
 //
-// Остальные атрибуты (muted, controls, autoplay) уходят на <video>, а не на
-// обёртку. src на сам <video> не ставится: поток подключает useHlsPlayer.
+// Остальные атрибуты (poster, muted, controls, autoPlay) уходят на <video>,
+// а не на обёртку. src на сам <video> не ставится: поток подключает
+// useHlsPlayer.
 type HlsVideoProps = Omit<VideoHTMLAttributes<HTMLVideoElement>, "src"> & {
   src: string;
-  poster?: string;
 };
 
-export default function HlsVideo({
-  src,
-  poster = "",
-  className,
-  ...attrs
-}: HlsVideoProps) {
+export default function HlsVideo({ src, className, ...attrs }: HlsVideoProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const { hasError, retry } = useHlsPlayer(videoRef, src);
 
@@ -34,7 +29,6 @@ export default function HlsVideo({
           hasError && "grayscale",
           className,
         )}
-        poster={poster}
         {...attrs}
       />
       {hasError && (

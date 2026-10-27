@@ -30,7 +30,7 @@ npm run format       # Prettier по src/
 
 **TypeScript закреплён на 6.x.** Сам `tsc` 7 (Go-порт) проект проверил бы, но `typescript-eslint` требует `typescript <6.1.0`: его парсер работает через JS-API компилятора, которого в 7.0 нет. Не обновлять до 7, пока `typescript-eslint` его не поддержит.
 
-**ESLint без type-aware правил.** `tseslint.configs.recommended`, а не `recommendedTypeChecked`: за типы отвечает `tsc`. Хуки проверяет `eslint-plugin-react-hooks` (набор `flat.recommended` с правилами React Compiler). Его `react-hooks/immutability` считает мутацией аргумента хука запись в свойство DOM-элемента из ref внутри эффекта — поэтому в `useHlsPlayer` `src` ставится через `setAttribute`. Форматирующих правил в ESLint нет — за них Prettier, `eslint-config-prettier` идёт последним в конфиге.
+**ESLint без type-aware правил.** `tseslint.configs.recommended`, а не `recommendedTypeChecked`: за типы отвечает `tsc`. Хуки проверяет `eslint-plugin-react-hooks` (набор `flat.recommended` с правилами React Compiler). Его `react-hooks/immutability` считает мутацией аргумента хука запись в свойство DOM-элемента из ref прямо в теле эффекта — поэтому работа с `<video>` в `useHlsPlayer` вынесена в функции уровня модуля (`attachHls`, `attachNative`). Форматирующих правил в ESLint нет — за них Prettier, `eslint-config-prettier` идёт последним в конфиге.
 
 **Vitest на happy-dom** с `src/test/setup.ts`, компоненты тестируются через `@testing-library/react`. Setup вызывает `cleanup` после каждого теста (без `globals: true` Testing Library сама этого не делает) и решает конфликт версий: Node 26 объявляет собственный экспериментальный глобальный `localStorage`, недоступный без `--localstorage-file`; ключ на `globalThis` существует, поэтому окружение happy-dom его не перекрывает и `localStorage` в тестах оказывается `undefined`. Setup ставит `Storage` из happy-dom явно.
 
@@ -55,7 +55,8 @@ Pre-commit (husky + lint-staged) прогоняет по изменённым `*
 
 [src/data/cameras.ts](src/data/cameras.ts) — единственный источник, типизирован как `Camera` ([src/types/camera.ts](src/types/camera.ts)). Оттуда же экспортируется `places` — уникальные локации в порядке появления.
 
-- Компоненты фильтруют список по `camera.src`; `HomePage` дополнительно по активной локации и запоминает выбор в `localStorage` под ключом `snowcam-place-tab`. Панель вкладок появляется только при 2+ локациях.
+- `HomePage` фильтрует список по активной локации и запоминает выбор в `localStorage` под ключом `snowcam-place-tab`. Панель вкладок появляется только при 2+ локациях. Временно отключённую камеру комментируют в `cameras.ts`.
+- Колонки сетки считает `cameraGridCols()` ([src/lib/cameraGrid.ts](src/lib/cameraGrid.ts)) по числу камер: до трёх — в один ряд на десктопе, четыре — 2×2, больше — по три. Классы Tailwind там перечислены целиком: собранные из частей строки Tailwind не найдёт.
 - `poster` — путь к превью в `public/previews/`, **обязательно 16:9** (см. ниже). Формат — WebP 720×405, имя файла — md5 содержимого (кэш-бастинг: новое превью кладётся под новым именем, старое удаляется).
 - Постеры пересобираются кадром из живого потока:
   ```bash
