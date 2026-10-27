@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite --host=0.0.0.0",
     "build": "npm run typecheck && vite build",
-    "typecheck": "vue-tsc --build",
+    "typecheck": "tsc --build",
     "eslint": "eslint . --fix",
     "format": "prettier --write src/",
     "preview": "vite preview --host=0.0.0.0",
@@ -16,22 +16,24 @@
   },
   "dependencies": {
     "@bybas/weather-icons": "^2.0.0",
-    "@owliehq/vue-addtohomescreen": "^2.0.3",
     "dayjs": "^1.11.23",
     "hls.js": "^1.7.3",
     "ios-pwa-splash": "^1.0.0",
-    "vue": "^3.5.44"
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@tailwindcss/vite": "^4.3.3",
+    "@testing-library/dom": "^10.4.2",
+    "@testing-library/react": "^16.3.3",
     "@types/node": "^26.6.5",
-    "@vitejs/plugin-vue": "^6.0.10",
-    "@vue/test-utils": "^2.5.1",
-    "@vue/tsconfig": "^0.9.1",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
     "eslint": "^10.13.0",
     "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-vue": "^10.12.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^17.13.0",
     "happy-dom": "^21.0.4",
     "husky": "^9.1.7",
@@ -43,12 +45,10 @@
     "typescript-eslint": "^8.72.1",
     "vite": "^8.3.5",
     "vite-plugin-mkcert": "^2.1.0",
-    "vitest": "^5.0.5",
-    "vue-eslint-parser": "^10.4.1",
-    "vue-tsc": "^3.3.13"
+    "vitest": "^5.0.5"
   },
   "lint-staged": {
-    "*.{ts,vue}": [
+    "*.{ts,tsx}": [
       "eslint --fix",
       "prettier --write"
     ],

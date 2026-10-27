@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { flushPromises, mount } from "@vue/test-utils";
-import WeatherWidget from "./WeatherWidget.vue";
-import { WEATHER_CACHE_KEY } from "@/composables/useWeather";
+import { render } from "@testing-library/react";
+import WeatherWidget from "./WeatherWidget";
+import { WEATHER_CACHE_KEY } from "@/hooks/useWeather";
 import type { WeatherValues } from "@/types/tomorrow";
 
 interface Fixture {
@@ -51,11 +51,10 @@ function seedCache(values: WeatherValues, fixture: Fixture = {}): void {
   );
 }
 
-async function render(values: WeatherValues, fixture: Fixture = {}) {
+/** Текст виджета. Со свежим кэшем он готов уже на первом рендере. */
+function renderText(values: WeatherValues, fixture: Fixture = {}): string {
   seedCache(values, fixture);
-  const wrapper = mount(WeatherWidget);
-  await flushPromises();
-  return wrapper;
+  return render(<WeatherWidget />).container.textContent ?? "";
 }
 
 beforeEach(() => {
@@ -68,69 +67,69 @@ describe("WeatherWidget", () => {
   // Math.round(null) === 0 — так в виджете появлялся выдуманный «Снег 0 см».
   // Само поле snowDepth больше не запрашивается (оно всегда null вне США),
   // но nullable-поля остались: visibility, cloudBase и суточные агрегаты
-  it("не выдаёт null за ноль", async () => {
-    const wrapper = await render({
+  it("не выдаёт null за ноль", () => {
+    const text = renderText({
       temperature: 5.4,
       windSpeed: 1.2,
       visibility: null,
     });
 
-    expect(wrapper.text()).not.toContain("Видимость");
-    expect(wrapper.text()).not.toContain("0 км");
+    expect(text).not.toContain("Видимость");
+    expect(text).not.toContain("0 км");
   });
 
-  it("не показывает снег, когда его нет", async () => {
-    const wrapper = await render({ temperature: 5.4, windSpeed: 1.2 });
+  it("не показывает снег, когда его нет", () => {
+    const text = renderText({ temperature: 5.4, windSpeed: 1.2 });
 
-    expect(wrapper.text()).not.toContain("Снег");
-    expect(wrapper.text()).not.toContain("см");
+    expect(text).not.toContain("Снег");
+    expect(text).not.toContain("см");
   });
 
-  it("показывает свежий снег за сутки в сантиметрах", async () => {
-    const wrapper = await render(
+  it("показывает свежий снег за сутки в сантиметрах", () => {
+    const text = renderText(
       { temperature: -3 },
       { past: [{ snowAccumulation: 70 }, { snowAccumulation: 50 }] },
     );
 
     // 120 мм = 12 см
-    expect(wrapper.text()).toContain("Свежего 12 см за сутки");
+    expect(text).toContain("Свежего 12 см за сутки");
   });
 
-  it("предупреждает о ветре, при котором встают подъёмники", async () => {
-    const wrapper = await render(
+  it("предупреждает о ветре, при котором встают подъёмники", () => {
+    const text = renderText(
       { temperature: -3 },
       { today: { windGustMax: 18, temperatureMax: -1 } },
     );
 
-    expect(wrapper.text()).toContain("18 м/с");
-    expect(wrapper.text()).toContain("подъёмники");
+    expect(text).toContain("18 м/с");
+    expect(text).toContain("подъёмники");
   });
 
-  it("летом не показывает ни снежный блок, ни предупреждения о склоне", async () => {
-    const wrapper = await render(
+  it("летом не показывает ни снежный блок, ни предупреждения о склоне", () => {
+    const text = renderText(
       { temperature: 14, precipitationType: 1, rainIntensity: 2 },
       { today: { temperatureMax: 18, temperatureMin: 6, windGustMax: 4 } },
     );
 
-    expect(wrapper.text()).not.toContain("Свежего");
-    expect(wrapper.text()).not.toContain("Ожидается");
-    expect(wrapper.text()).not.toContain("Дождь на склоне");
+    expect(text).not.toContain("Свежего");
+    expect(text).not.toContain("Ожидается");
+    expect(text).not.toContain("Дождь на склоне");
   });
 
-  it("округляет температуру вниз и показывает ощущаемую", async () => {
-    const wrapper = await render({
+  it("округляет температуру вниз и показывает ощущаемую", () => {
+    const text = renderText({
       temperature: 5.9,
       temperatureApparent: 2.1,
     });
 
-    expect(wrapper.text()).toContain("5");
-    expect(wrapper.text()).toContain("Ощущается 2°");
+    expect(text).toContain("5");
+    expect(text).toContain("Ощущается 2°");
   });
 
-  it("не рисует разделитель перед единственным показателем", async () => {
-    const wrapper = await render({ temperature: 5, humidity: 95 });
+  it("не рисует разделитель перед единственным показателем", () => {
+    const text = renderText({ temperature: 5, humidity: 95 });
 
-    expect(wrapper.text()).toContain("Влажность 95%");
-    expect(wrapper.text()).not.toContain("·");
+    expect(text).toContain("Влажность 95%");
+    expect(text).not.toContain("·");
   });
 });

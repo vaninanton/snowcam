@@ -16,7 +16,7 @@ cp .env.example .env # затем указать VITE_TOMORROW_API_KEY (ключ
 
 npm run dev          # dev-сервер, HTTPS через mkcert, --host=0.0.0.0
 npm run build        # typecheck + сборка в dist/
-npm run typecheck    # vue-tsc --build (проверяет и шаблоны)
+npm run typecheck    # tsc --build
 npm test             # vitest run
 npm run test:watch   # vitest в watch-режиме
 npm run preview      # просмотр сборки (тоже по HTTPS — curl'ить с -k)
@@ -24,25 +24,19 @@ npm run eslint       # ESLint с автофиксом
 npm run format       # Prettier по src/
 ```
 
-Проверка изменений — `npm run typecheck` + `npm test` + `npm run build`. Один тест: `npx vitest run src/composables/useWeather.test.ts`.
+Проверка изменений — `npm run typecheck` + `npm test` + `npm run build`. Один тест: `npx vitest run src/hooks/useWeather.test.ts`.
 
 ## Тулинг
 
-**TypeScript закреплён на 6.x.** TypeScript 7 — это Go-порт, он не отдаёт `./lib/tsc`, на который опирается `vue-tsc`, и проверка типов на нём падает с `ERR_PACKAGE_PATH_NOT_EXPORTED`. Не обновлять до 7, пока `vue-tsc` не начнёт его поддерживать.
+**TypeScript закреплён на 6.x.** Сам `tsc` 7 (Go-порт) проект проверил бы, но `typescript-eslint` требует `typescript <6.1.0`: его парсер работает через JS-API компилятора, которого в 7.0 нет. Не обновлять до 7, пока `typescript-eslint` его не поддержит.
 
-**ESLint намеренно без type-aware правил.** `tseslint.configs.recommended`, а не `recommendedTypeChecked`: сервис typescript-eslint не типизирует SFC и выдаёт `any` на каждый импорт `.vue`, из-за чего `no-unsafe-*` сыплют ложными срабатываниями. За типы отвечает `vue-tsc`, который видит и шаблоны. Форматирующих правил в ESLint нет — за них Prettier, `eslint-config-prettier` идёт последним в конфиге.
+**ESLint без type-aware правил.** `tseslint.configs.recommended`, а не `recommendedTypeChecked`: за типы отвечает `tsc`. Хуки проверяет `eslint-plugin-react-hooks` (набор `flat.recommended` с правилами React Compiler). Его `react-hooks/immutability` считает мутацией аргумента хука запись в свойство DOM-элемента из ref внутри эффекта — поэтому в `useHlsPlayer` `src` ставится через `setAttribute`. Форматирующих правил в ESLint нет — за них Prettier, `eslint-config-prettier` идёт последним в конфиге.
 
-**Vitest на happy-dom** с `src/test/setup.ts`. Setup нужен из-за конфликта версий: Node 26 объявляет собственный экспериментальный глобальный `localStorage`, недоступный без `--localstorage-file`; ключ на `globalThis` существует, поэтому окружение happy-dom его не перекрывает и `localStorage` в тестах оказывается `undefined`. Setup ставит `Storage` из happy-dom явно.
+**Vitest на happy-dom** с `src/test/setup.ts`, компоненты тестируются через `@testing-library/react`. Setup вызывает `cleanup` после каждого теста (без `globals: true` Testing Library сама этого не делает) и решает конфликт версий: Node 26 объявляет собственный экспериментальный глобальный `localStorage`, недоступный без `--localstorage-file`; ключ на `globalThis` существует, поэтому окружение happy-dom его не перекрывает и `localStorage` в тестах оказывается `undefined`. Setup ставит `Storage` из happy-dom явно.
 
-В `.npmrc` включён `legacy-peer-deps=true` — peer-зависимости не доустанавливаются автоматически. Из-за этого `vue-eslint-parser` (peer для `eslint-plugin-vue`) прописан в `devDependencies` явно; при добавлении плагинов с peer-зависимостями их тоже нужно ставить руками.
+В `.npmrc` включён `legacy-peer-deps=true` — peer-зависимости не доустанавливаются автоматически. Поэтому `@testing-library/dom` (peer для `@testing-library/react`) прописан в `devDependencies` явно; при добавлении пакетов с peer-зависимостями их тоже нужно ставить руками.
 
-Pre-commit (husky + lint-staged) прогоняет по изменённым `*.{ts,vue}` `eslint --fix` и `prettier --write`, перед этим — `npm test`.
-
-## Ловушка: комментарии в `<template>`
-
-**Не ставить HTML-комментарии рядом с корневым элементом шаблона.** Узел-комментарий делает шаблон фрагментом, и Vue перестаёт наследовать атрибуты от родителя — `class`, `muted`, `controls` молча пропадают. В dev-сборке комментарии сохраняются, в production вырезаются, поэтому баг проявляется только в разработке и в тестах. Пояснения к разметке пишутся в `<script setup>` — так сделано в `HlsVideo.vue` и `WindCompass.vue`.
-
-Смежная ловушка: атрибуты на самом блоке `<template>` (`<template class="..." :style="...">`) Vue отбрасывает без предупреждения. Именно так `WindCompass` долго рендерился голым текстовым узлом и стрелка ветра не поворачивалась.
+Pre-commit (husky + lint-staged) прогоняет по изменённым `*.{ts,tsx}` `eslint --fix` и `prettier --write`, перед этим — `npm test`.
 
 ## Архитектура
 
@@ -50,10 +44,10 @@ Pre-commit (husky + lint-staged) прогоняет по изменённым `*
 
 ### Две точки входа (multi-page Vite)
 
-- `index.html` → [src/main.ts](src/main.ts) → [src/pages/HomePage.vue](src/pages/HomePage.vue) — вкладки локаций, погода, сетка камер
-- `videowall.html` → [src/videowall.ts](src/videowall.ts) → [src/pages/VideoWallPage.vue](src/pages/VideoWallPage.vue) — «видеостена» без обвязки
+- `index.html` → [src/main.tsx](src/main.tsx) → [src/pages/HomePage.tsx](src/pages/HomePage.tsx) — вкладки локаций, погода, сетка камер, баннер установки
+- `videowall.html` → [src/videowall.tsx](src/videowall.tsx) → [src/pages/VideoWallPage.tsx](src/pages/VideoWallPage.tsx) — «видеостена» без обвязки
 
-Обе монтируются через [src/createApp.ts](src/createApp.ts) — `createSnowCamApp(RootComponent, { splashImage, beforeMount })`. Она вызывает `beforeMount(app)` для плагинов конкретной страницы (`AddToHomescreen` подключается только в `main.ts`), монтирует в `#app` и инициализирует iOS PWA splash. **Новый вход добавляется через неё**, а не через собственный `createApp`.
+Обе монтируются через [src/createApp.tsx](src/createApp.tsx) — `createSnowCamApp(<Root />, { splashImage })`. Она рендерит дерево в `#app` внутри `StrictMode` и инициализирует iOS PWA splash. Компоненты конкретной страницы передаются прямо в дерево (`AddToHomescreen` есть только в `main.tsx`). **Новый вход добавляется через неё**, а не через собственный `createRoot`.
 
 Сборка (rolldown-опции Vite 8) выносит `hls.js` в чанк `hls`, остальной `node_modules` — в `vendor`. Пути входов резолвятся через `import.meta.dirname` (`__dirname` ломает нативный загрузчик конфига Vite). Алиас `@` → `src/` объявлен в `vite.config.ts`, `vitest.config.ts` и `tsconfig.app.json` — при переименованиях править во всех трёх.
 
@@ -73,19 +67,17 @@ Pre-commit (husky + lint-staged) прогоняет по изменённым `*
 
 ### Воспроизведение
 
-[src/components/HlsVideo.vue](src/components/HlsVideo.vue) + [src/composables/useHlsPlayer.ts](src/composables/useHlsPlayer.ts): через hls.js там, где поддерживается, иначе нативный HLS в Safari/iOS. Композабл пересоздаёт проигрыватель при смене `src` и уничтожает его на `onBeforeUnmount` — без этого hls.js продолжает тянуть сегменты в фоне.
+[src/components/HlsVideo.tsx](src/components/HlsVideo.tsx) + [src/hooks/useHlsPlayer.ts](src/hooks/useHlsPlayer.ts): через hls.js там, где поддерживается, иначе нативный HLS в Safari/iOS. Хук подключает поток в `useEffect` и уничтожает проигрыватель в его cleanup — при смене `src` и при размонтировании. Без этого hls.js продолжает тянуть сегменты в фоне. `src` на сам `<video>` не ставится: поток подключает только хук.
 
-Бокс 16:9 задан **в самом компоненте**, а не в местах использования: `relative aspect-video w-full` на обёртке, `h-full w-full object-cover` на `<video>`. Без `w-full` ширину `<video>` определяет разрешение постера, без `aspect-video` высота до загрузки потока берётся из постера и меняется на размеры видео — отсюда прыжки страницы. Подключение делается в `onMounted`, а не в `watch` с `immediate`: к этому моменту ref уже заполнен, и порядок не зависит от планировщика эффектов.
+Бокс 16:9 задан **в самом компоненте**, а не в местах использования: `relative aspect-video w-full` на обёртке, `h-full w-full object-cover` на `<video>`. Без `w-full` ширину `<video>` определяет разрешение постера, без `aspect-video` высота до загрузки потока берётся из постера и меняется на размеры видео — отсюда прыжки страницы. Корень компонента — `<div>`, а остальные пропсы (`muted`, `controls`, `autoPlay`, `playsInline`) пробрасываются на `<video>`. React выставляет `muted` свойством элемента, а не атрибутом — в тестах проверяется `video.muted`.
 
-Корень компонента — `<div>`, поэтому стоит `inheritAttrs: false`, а `$attrs` пробрасываются на `<video>` вручную: иначе `muted`, `controls`, `autoplay` осели бы на обёртке и плеер бы не завёлся.
-
-**Недоступные камеры.** Композабл слушает `Hls.Events.ERROR` и `error` у `<video>` (нативный путь). Нефатальные ошибки hls.js разбирает сам — реагируем только на `data.fatal`: гасим проигрыватель и поднимаем `hasError`. Компонент тогда обесцвечивает кадр (`grayscale`) и кладёт поверх постера полупрозрачную серую подложку `bg-slate-900/70` с кнопкой повтора — так мёртвая плитка не путается с живой. Кнопка зовёт `retry()` (тот же `attach()`), который сбрасывает `hasError`. В нативной ветке после присвоения `src` вызывается `element.load()`: при повторе значение `src` не меняется, и без `load()` браузер может не пойти за потоком заново.
+**Недоступные камеры.** Хук слушает `Hls.Events.ERROR` и `error` у `<video>` (нативный путь). Нефатальные ошибки hls.js разбирает сам — реагируем только на `data.fatal`: гасим проигрыватель и поднимаем `hasError`. Компонент тогда обесцвечивает кадр (`grayscale`) и кладёт поверх постера полупрозрачную серую подложку `bg-slate-900/70` с кнопкой повтора — так мёртвая плитка не путается с живой. Ошибка привязана к ключу подключения (`src` + номер попытки): `retry()` увеличивает номер, эффект переподключает поток, и заглушка пропадает без ручного сброса состояния — смена `src` работает так же. В нативной ветке после присвоения `src` вызывается `element.load()`: при повторе значение `src` не меняется, и без `load()` браузер может не пойти за потоком заново.
 
 ### Погода (Tomorrow.io)
 
-- [src/composables/useWeather.ts](src/composables/useWeather.ts) — **единственное место запроса к API**, нативный `fetch`. Ответ кэшируется в `localStorage` под ключом `tomorrowioData` **на 6 часов** (у API ограниченный бесплатный лимит — не убирать кэш и не добавлять повторных запросов). Ключ сохранён с доTS-версии, чтобы не осиротить кэш у пользователей. Клик по `VersionString` на главной вызывает `clearCache()` и перезагружает страницу.
+- [src/hooks/useWeather.ts](src/hooks/useWeather.ts) — **единственное место запроса к API**, нативный `fetch`. Загрузка с кэшем — обычная функция `loadWeather()`, хук `useWeather()` только кладёт результат в состояние (`loading` / `error` / `ready`); со свежим кэшем он готов уже на первом рендере. Одновременные вызовы `loadWeather()` делят один запрос: StrictMode в dev запускает эффекты дважды, и без этого каждая перезагрузка страницы тратила бы два запроса из лимита. Ответ кэшируется в `localStorage` под ключом `tomorrowioData` **на 6 часов** (у API ограниченный бесплатный лимит — не убирать кэш и не добавлять повторных запросов). Ключ сохранён с доTS-версии, чтобы не осиротить кэш у пользователей. Клик по `VersionString` на главной вызывает `clearCache()` и перезагружает страницу.
 - [src/components/weather/tomorrow.ts](src/components/weather/tomorrow.ts) — координаты, таймзона `Asia/Almaty`, список полей с расшифровками и `buildTimelineUrl()`. Списочные параметры (`location`, `fields`, `timesteps`) API ждёт через запятую, поэтому массивы склеиваются через `join(",")` вручную.
-- [src/components/weather/conditions.ts](src/components/weather/conditions.ts) — вывод показателей для катания из сырых интервалов. Чистая функция без Vue, вся логика тестируется отдельно от компонентов.
+- [src/components/weather/conditions.ts](src/components/weather/conditions.ts) — вывод показателей для катания из сырых интервалов. Чистая функция без React, вся логика тестируется отдельно от компонентов.
 - [src/components/weather/dayjs.ts](src/components/weather/dayjs.ts) — **единственное место регистрации плагинов dayjs** (`isSameOrAfter`, `isSameOrBefore`). Импортировать дату нужно отсюда, а не напрямую из `"dayjs"`: библиотека — синглтон, и прямой импорт не увидит расширенных методов. Плагины подключаются с расширением `.js` в пути, иначе модуль не резолвится вне бандлера.
 - [src/components/weather/icons.ts](src/components/weather/icons.ts) — маппинг `weatherCode` на SVG из `@bybas/weather-icons`, отдельно день/ночь. Таблицы объявлены на уровне модуля.
 - Типы ответа — [src/types/tomorrow.ts](src/types/tomorrow.ts). Все поля `values` опциональны: набор зависит от timestep.
@@ -108,22 +100,23 @@ Pre-commit (husky + lint-staged) прогоняет по изменённым `*
 
 ### PWA
 
-Собирается **без** service worker и без `vite-plugin-pwa`: манифест — статический `public/site.webmanifest`, splash для iOS — рантайм-библиотека `ios-pwa-splash` из `createApp.ts`, промпт установки — `@owliehq/vue-addtohomescreen`. У обоих пакетов нет своих типов, декларации лежат в [src/env.d.ts](src/env.d.ts). Safe-area отступы заданы в `src/style.css`. Tailwind 4 подключён плагином `@tailwindcss/vite`, отдельного PostCSS-пайплайна в проекте нет.
+Собирается **без** service worker и без `vite-plugin-pwa`: манифест — статический `public/site.webmanifest`, splash для iOS — рантайм-библиотека `ios-pwa-splash` из `createApp.tsx`, промпт установки — свой компонент [src/components/AddToHomescreen.tsx](src/components/AddToHomescreen.tsx): показывается один раз (кука `addToHomescreenCalled` на год — имя сохранено с прежнего Vue-плагина, клик по версии её сбрасывает), в Chromium вызывает системный диалог через `beforeinstallprompt`, в остальных браузерах показывает инструкцию. У `ios-pwa-splash` нет своих типов, декларация лежит в [src/env.d.ts](src/env.d.ts). Safe-area отступы заданы в `src/style.css`. Tailwind 4 подключён плагином `@tailwindcss/vite`, отдельного PostCSS-пайплайна в проекте нет.
 
 ## Конвенции кода
 
-- Vue 3 Composition API, только `<script setup lang="ts">`. Тяжёлые компоненты подключаются в родителе через `defineAsyncComponent` (см. `HomePage.vue`).
-- Props и emits описываются через дженерики (`defineProps<{...}>()`), а не объектным синтаксисом.
-- Имена компонентов и их файлов — PascalCase, композаблы — `useXxx.ts`, переменные и функции — camelCase.
+- React 19, только функциональные компоненты и хуки, файлы `.tsx`. Компонент экспортируется по умолчанию. Тяжёлые компоненты подключаются в родителе через `lazy` + `Suspense` (см. `HomePage.tsx`).
+- Пропсы типизируются в сигнатуре компонента, без `React.FC`. Условные классы склеиваются через `cx()` из [src/lib/cx.ts](src/lib/cx.ts).
+- Логика без JSX (расчёты, запросы, кэш) живёт в чистых функциях, хуки — тонкая обёртка над ними.
+- Имена компонентов и их файлов — PascalCase, хуки — `src/hooks/useXxx.ts`, переменные и функции — camelCase.
 - Строки — двойные кавычки. ES-модули везде.
 - Стили — только утилитарные классы Tailwind 4 в шаблоне; глобальное — в `src/style.css`. Тема тёмная (`bg-slate-900 text-slate-400` на `<body>`).
-- Тесты лежат рядом с кодом как `*.test.ts`.
+- Тесты лежат рядом с кодом как `*.test.ts` / `*.test.tsx`.
 - Коммиты — Conventional Commits на русском.
 
 ## CI и деплой
 
 - `.github/workflows/ci.yml`: на PR и push в `main` — typecheck, ESLint, `prettier --check`, тесты.
 - `.github/workflows/deploy.yml`: push в `main` → `npm ci` → `npm run build` (включает typecheck) с `VITE_BUILD_VERSION=${{ github.sha }}` и `VITE_TOMORROW_API_KEY` из секретов → GitHub Pages → уведомление в Telegram. Шаг уведомления помечен `continue-on-error`: сайт к нему уже опубликован.
-- `VITE_BUILD_VERSION` показывается в `VersionString.vue` (первые 7 символов SHA); при локальной сборке переменной нет и отображается `ver: develop`.
+- `VITE_BUILD_VERSION` показывается в `VersionString.tsx` (первые 7 символов SHA); при локальной сборке переменной нет и отображается `ver: develop`.
 
 `index.html` содержит счётчик Яндекс.Метрики — при правках `<head>`/`<body>` его не терять.

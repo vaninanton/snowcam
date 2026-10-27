@@ -28,6 +28,6 @@ jobs:
       - name: Lint
         run: npx eslint .
       - name: Format check
-        run: npx prettier --check "src/**/*.{ts,vue,css}" "*.{ts,json}"
+        run: npx prettier --check "src/**/*.{ts,tsx,css}" "*.{ts,json}"
       - name: Test
         run: npm test

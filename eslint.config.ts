@@ -1,6 +1,6 @@
 import js from "@eslint/js";
 import globals from "globals";
-import pluginVue from "eslint-plugin-vue";
+import reactHooks from "eslint-plugin-react-hooks";
 import tseslint from "typescript-eslint";
 import prettier from "eslint-config-prettier";
 
@@ -9,20 +9,15 @@ export default tseslint.config(
     ignores: ["dist/**", "public/**"],
   },
   js.configs.recommended,
-  // Синтаксические правила без привязки к типам: type-aware набор не умеет
-  // типизировать .vue и выдаёт any на каждый импорт SFC. За типы отвечает
-  // vue-tsc — он видит и шаблоны тоже.
+  // Синтаксические правила без привязки к типам: за типы отвечает tsc,
+  // а type-aware набор заметно замедляет линт без выигрыша для проекта
+  // такого размера.
   tseslint.configs.recommended,
-  pluginVue.configs["flat/essential"],
+  reactHooks.configs.flat.recommended,
   {
-    files: ["**/*.{ts,vue}"],
+    files: ["**/*.{ts,tsx}"],
     languageOptions: {
       globals: globals.browser,
-      parserOptions: {
-        // Разбор <script lang="ts"> внутри .vue
-        parser: tseslint.parser,
-        extraFileExtensions: [".vue"],
-      },
     },
     rules: {
       "@typescript-eslint/no-unused-vars": [

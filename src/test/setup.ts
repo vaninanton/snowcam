@@ -1,3 +1,5 @@
+import { afterEach } from "vitest";
+import { cleanup } from "@testing-library/react";
 import { Storage } from "happy-dom";
 
 // Node 26 объявляет собственный экспериментальный глобальный localStorage,
@@ -11,3 +13,7 @@ for (const name of ["localStorage", "sessionStorage"] as const) {
     writable: true,
   });
 }
+
+// Testing Library размонтирует компоненты сама только при globals: true,
+// без них отрендеренное между тестами копится в document.body
+afterEach(cleanup);
