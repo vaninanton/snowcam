@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import TimelineItem from "./TimelineItem";
 import WeatherIcon from "./WeatherIcon";
+import WeatherPlaceholder from "./WeatherPlaceholder";
 import WindCompass from "./WindCompass";
 import { deriveConditions, type SkiConditions } from "./conditions";
 import { floorOrNull, roundOrNull } from "./format";
@@ -196,13 +197,7 @@ function Forecast({ data }: { data: WeatherData }) {
 export default function WeatherWidget() {
   const weather = useWeather();
 
-  if (weather.status === "loading") {
-    return (
-      <div className="px-1 py-4 sm:px-0 sm:max-w-2xl sm:mx-auto">
-        Загрузка данных...
-      </div>
-    );
-  }
+  if (weather.status === "loading") return <WeatherPlaceholder />;
   if (weather.status === "error") {
     return (
       <div className="px-1 py-4 text-slate-500 sm:px-0 sm:max-w-2xl sm:mx-auto">

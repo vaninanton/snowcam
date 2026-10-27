@@ -1,6 +1,7 @@
 import { lazy, Suspense, useState } from "react";
 import { SHOWN_COOKIE } from "@/components/AddToHomescreen";
 import CameraVideo from "@/components/CameraVideo";
+import WeatherPlaceholder from "@/components/weather/WeatherPlaceholder";
 import VersionString from "@/components/VersionString";
 import { cameras, places } from "@/data/cameras";
 import { clearCache } from "@/hooks/useWeather";
@@ -50,7 +51,7 @@ export default function HomePage() {
 
   return (
     <>
-      <Suspense>
+      <Suspense fallback={<WeatherPlaceholder />}>
         <WeatherWidget />
       </Suspense>
       {places.length > 1 && (
