@@ -1,5 +1,6 @@
 import { lazy, Suspense, useState } from "react";
 import { SHOWN_COOKIE } from "@/components/AddToHomescreen";
+import CameraVideo from "@/components/CameraVideo";
 import VersionString from "@/components/VersionString";
 import { cameras, places } from "@/data/cameras";
 import { clearCache } from "@/hooks/useWeather";
@@ -9,7 +10,6 @@ import { cx } from "@/lib/cx";
 const STORAGE_KEY_PLACE = "snowcam-place-tab";
 
 const WeatherWidget = lazy(() => import("@/components/weather/WeatherWidget"));
-const HlsVideo = lazy(() => import("@/components/HlsVideo"));
 
 function readSavedPlace(): string {
   try {
@@ -80,24 +80,11 @@ export default function HomePage() {
       >
         {visibleCameras.map((camera) => (
           <li key={camera.title}>
-            <div>
-              <div className="p-2 sm:p-0">
-                <h2 className="font-semibold">
-                  {camera.title}
-                  {camera.elevation > 0 && `, ${camera.elevation} м`}
-                </h2>
-              </div>
-              <Suspense>
-                <HlsVideo
-                  src={camera.src}
-                  poster={camera.poster}
-                  muted
-                  controls
-                  playsInline
-                  autoPlay
-                />
-              </Suspense>
-            </div>
+            <h2 className="p-2 sm:p-0 font-semibold">
+              {camera.title}
+              {camera.elevation > 0 && `, ${camera.elevation} м`}
+            </h2>
+            <CameraVideo camera={camera} />
           </li>
         ))}
       </ul>
