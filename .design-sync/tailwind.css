@@ -1,0 +1,41 @@
+/*
+  Стили для Claude Design (design-sync). Собирается Tailwind CLI в
+  .design-sync/.cache/tailwind.out.css (см. buildCmd в config.json).
+
+  Берёт глобальные стили приложения из src/style.css и классы из src/,
+  а сверх них — словарь утилит, которым агент Claude Design собирает свою
+  вёрстку: без него в CSS попали бы только классы, уже встречающиеся в коде.
+*/
+@import "../src/style.css";
+@import "tailwindcss/theme.css" layer(theme) theme(static);
+
+@source "../src";
+@source "./previews";
+
+/* Палитра приложения: slate — фон и текст, sky — акцент, amber — предупреждения */
+@source inline("{bg,text,border,divide,ring}-{slate,sky,amber}-{50,{100..900..100},950}");
+@source inline("{bg,border}-slate-{700,800,900,950}/{50,70,90}");
+@source inline("{bg,text,border,divide,ring}-{white,black}{,/5,/10,/20,/50,/70,/90}");
+@source inline("{bg,text,border}-transparent");
+
+/* Раскладка и отступы */
+@source inline("{,sm:,md:,lg:,xl:}{flex,inline-flex,grid,block,inline-block,hidden,contents}");
+@source inline("{,sm:,md:,lg:,xl:}{flex-row,flex-col,flex-wrap,flex-1,flex-none,shrink-0,grow,items-{start,center,end,baseline,stretch},justify-{start,center,end,between,around}}");
+@source inline("{,sm:,md:,lg:,xl:}grid-cols-{1..6}");
+@source inline("{,sm:,md:,lg:,xl:}{p,px,py,pt,pb,pl,pr,m,mx,my,mt,mb,ml,mr,gap,gap-x,gap-y,space-x,space-y}-{0,0.5,1,1.5,2,2.5,3,4,5,6,8,10,12,16}");
+@source inline("{,sm:,md:,lg:,xl:}{w,h,size,min-w,min-h}-{0,1,2,3,4,5,6,8,10,12,14,16,20,24,32,40,48,64,full,screen,auto}");
+@source inline("{,sm:,md:,lg:,xl:}max-w-{xs,sm,md,lg,xl,2xl,3xl,4xl,5xl,6xl,7xl,full,none}");
+@source inline("{mx-auto,my-auto,aspect-video,aspect-square,overflow-hidden,overflow-x-auto,overflow-y-auto,truncate,relative,absolute,fixed,sticky,inset-0,top-0,bottom-0,left-0,right-0,z-10,z-20,z-50}");
+
+/* Типографика и оформление */
+@source inline("{,sm:}text-{xs,sm,base,lg,xl,2xl,3xl,4xl,5xl,6xl}");
+@source inline("font-{extralight,light,normal,medium,semibold,bold} leading-{none,tight,snug,normal} tracking-{tight,wide} text-{left,center,right} uppercase whitespace-nowrap tabular-nums");
+@source inline("rounded{,-sm,-md,-lg,-xl,-2xl,-full} border{,-0,-2,-t,-b,-l,-r} shadow{,-sm,-md,-lg} opacity-{0,50,70,100} grayscale backdrop-blur{,-sm}");
+@source inline("{,hover:}{bg,text,border}-{slate,sky}-{300,400,500,600,700,800} hover:underline transition-colors cursor-pointer select-none");
+
+/* Тема приложения задана классами на <body> в index.html */
+@layer base {
+  body {
+    @apply antialiased bg-slate-900 text-slate-400;
+  }
+}
