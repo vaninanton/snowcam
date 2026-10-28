@@ -19,3 +19,9 @@ dist-ssr
 *.sln
 *.sw?
 .env
+# design-sync: скрипты конвертера, сборка и машинное состояние
+.ds-sync/
+ds-bundle/
+.design-sync/.cache/
+.design-sync/learnings/
+.design-sync/node_modules

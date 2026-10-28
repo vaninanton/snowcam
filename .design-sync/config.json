@@ -1,0 +1,57 @@
+{
+  "projectId": "2764f91d-e487-4319-9154-94837955c515",
+  "shape": "package",
+  "pkg": "snowcam",
+  "globalName": "SnowCam",
+  "buildCmd": ".ds-sync/node_modules/.bin/tailwindcss -i .design-sync/tailwind.css -o .design-sync/.cache/tailwind.out.css --minify",
+  "tsconfig": "tsconfig.app.json",
+  "cssEntry": ".design-sync/.cache/tailwind.out.css",
+  "componentSrcMap": {
+    "AddToHomescreen": "src/components/AddToHomescreen.tsx",
+    "CameraVideo": "src/components/CameraVideo.tsx",
+    "HlsVideo": "src/components/HlsVideo.tsx",
+    "VersionString": "src/components/VersionString.tsx",
+    "TimelineItem": "src/components/weather/TimelineItem.tsx",
+    "WeatherIcon": "src/components/weather/WeatherIcon.tsx",
+    "WeatherPlaceholder": "src/components/weather/WeatherPlaceholder.tsx",
+    "WeatherWidget": "src/components/weather/WeatherWidget.tsx",
+    "WindCompass": "src/components/weather/WindCompass.tsx"
+  },
+  "docsDir": ".design-sync/docs",
+  "dtsPropsFor": {
+    "HlsVideo": "/** URL HLS-манифеста, например https://ipcam.kz/cam6/index.m3u8. */ src: string; /** Кадр 16:9 до первого кадра потока. */ poster?: string; muted?: boolean; controls?: boolean; autoPlay?: boolean; playsInline?: boolean; loop?: boolean; /** Классы на <video>; бокс 16:9 задан самим компонентом. */ className?: string",
+    "CameraVideo": "/** Запись камеры: elevation в метрах, src — HLS-манифест, poster — кадр 16:9. */ camera: { place: string; title: string; description: string; elevation: number; src: string; poster: string }",
+    "TimelineItem": "/** Один часовой интервал Tomorrow.io. */ timeline: { startTime: string; values: { temperature?: number; temperatureApparent?: number; weatherCode?: number; sunriseTime?: string; sunsetTime?: string; [key: string]: unknown } }",
+    "WeatherIcon": "/** Интервал Tomorrow.io: weatherCode и, для ночного варианта, sunriseTime/sunsetTime. */ timeline: { startTime: string; values: { temperature?: number; temperatureApparent?: number; weatherCode?: number; sunriseTime?: string; sunsetTime?: string; [key: string]: unknown } }; className?: string",
+    "WindCompass": "/** Градусы по часовой стрелке от севера, откуда дует ветер. */ windDirection: number; className?: string",
+    "VersionString": "/** В приложении — сброс кэша погоды и перезагрузка. */ onClick: () => void",
+    "AddToHomescreen": "",
+    "WeatherWidget": "",
+    "WeatherPlaceholder": ""
+  },
+  "overrides": {
+    "AddToHomescreen": {
+      "cardMode": "single",
+      "viewport": "720x260"
+    },
+    "CameraVideo": {
+      "cardMode": "column"
+    },
+    "WeatherWidget": {
+      "cardMode": "column"
+    },
+    "HlsVideo": {
+      "cardMode": "column"
+    },
+    "TimelineItem": {
+      "cardMode": "column"
+    },
+    "WeatherPlaceholder": {
+      "cardMode": "column"
+    },
+    "WindCompass": {
+      "cardMode": "column"
+    }
+  },
+  "readmeHeader": ".design-sync/conventions.md"
+}
